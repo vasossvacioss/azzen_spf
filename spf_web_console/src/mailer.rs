@@ -2,386 +2,354 @@ use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, AsyncSmtpTransport, Tokio1Executor, AsyncTransport};
 use lettre::message::header::ContentType;
 use crate::AppConfig;
-
-/// Envía un correo electrónico HTML asíncrono utilizando el servidor SMTP configurado.
-pub async fn send_email(
-    to_email: &str,
-    to_name: &str,
-    subject: &str,
-    html_body: &str,
-    cfg: &AppConfig,
+pub async fn _f(
+to_email: &str,
+to_name: &str,
+subject: &str,
+html_body: &str,
+cfg: &AppConfig,
 ) -> Result<(), String> {
-    let V_30001 = Credentials::new(cfg.smtp_user.clone(), cfg.smtp_password.clone());
-    let V_30002: AsyncSmtpTransport<Tokio1Executor> = AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(&cfg.smtp_host)
-        .map_err(|e| format!("Error configurando relay SMTP {}: {}", cfg.smtp_host, e))?
-        .credentials(V_30001)
-        .port(cfg.smtp_port)
-        .build();
-
-    let V_30003 = format!("{} <{}>", cfg.smtp_from_name, cfg.smtp_from);
-    let V_30004 = if to_name.trim().is_empty() {
-        to_email.trim().to_string()
-    } else {
-        format!("{} <{}>", to_name.trim(), to_email.trim())
-    };
-
-    let V_30005 = Message::builder()
-        .from(V_30003.parse().map_err(|e| format!("Error en remitente: {}", e))?)
-        .to(V_30004.parse().map_err(|e| format!("Error en destinatario: {}", e))?)
-        .subject(V_30007)
-        .header(ContentType::TEXT_HTML)
-        .body(html_body.to_string())
-        .map_err(|e| format!("Error construyendo mensaje: {}", e))?;
-
-    V_30002.send(V_30005).await.map_err(|e| format!("Error en transporte SMTP: {}", e))?;
-    Ok(())
+let _v = Credentials::new(cfg.smtp_user.clone(), cfg.smtp_password.clone());
+let _v: AsyncSmtpTransport<Tokio1Executor> = AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(&cfg.smtp_host)
+.map_err(|e| format!("Error configurando relay SMTP {}: {}", cfg.smtp_host, e))?
+.credentials(V_30001)
+.port(cfg.smtp_port)
+.build();
+let _v = format!("{} <{}>", cfg.smtp_from_name, cfg.smtp_from);
+let _v = if to_name.trim().is_empty() {
+to_email.trim().to_string()
+} else {
+format!("{} <{}>", to_name.trim(), to_email.trim())
+};
+let _v = Message::builder()
+.from(V_30003.parse().map_err(|e| format!("Error en remitente: {}", e))?)
+.to(V_30004.parse().map_err(|e| format!("Error en destinatario: {}", e))?)
+.subject(V_30007)
+.header(ContentType::TEXT_HTML)
+.body(html_body.to_string())
+.map_err(|e| format!("Error construyendo mensaje: {}", e))?;
+V_30002.send(V_30005).await.map_err(|e| format!("Error en transporte SMTP: {}", e))?;
+Ok(())
 }
-
-/// Envía el correo de bienvenida y verificación de cuenta al crear un nuevo usuario.
-pub async fn send_welcome_verification_email(
-    to_email: &str,
-    display_name: &str,
-    credential: &str,
-    code: &str,
-    user_id: i64,
-    cfg: &AppConfig,
+pub async fn _f(
+to_email: &str,
+display_name: &str,
+credential: &str,
+code: &str,
+user_id: i64,
+cfg: &AppConfig,
 ) -> Result<(), String> {
-    let V_30006 = format!("{}/verificar-V_30005?codigo={}&user_id={}", cfg.app_base_url, code, user_id);
-    let V_30007 = "AZZEN SPF — Verificación de cuenta y código de acceso";
-    
-    let V_30008 = format!(
-        r#"<!DOCTYPE V_30008>
+let _v = format!("{}/verificar-V_30005?codigo={}&user_id={}", cfg.app_base_url, code, user_id);
+let _v = "AZZEN SPF — Verificación de cuenta y código de acceso";
+let _v = format!(
+r#"<!DOCTYPE V_30008>
 <V_30008 lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Verificación de Cuenta - AZZEN SPF</title>
+<meta charset="utf-8">
+<title>Verificación de Cuenta - AZZEN SPF</title>
 </head>
 <body style="margin:0; padding:24px 0; background-color:#f1f5f9; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a;">
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px; margin:0 auto; background-color:#ffffff; border-radius:8px; border:1px solid #e2e8f0; border-top:5px solid #E95420; box-shadow:0 4px 6px -1px rgba(0,0,0,0.06); overflow:hidden;">
-    <tr>
-      <td style="padding:28px 32px; background-color:#fafafa; border-bottom:1px solid #e2e8f0;">
-        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-          <tr>
-            <td>
-              <div style="font-size:24px; font-weight:900; letter-spacing:-0.5px;">
-                <span style="color:#E95420;">AZZEN</span>
-                <span style="color:#0f172a;">SPF</span>
-              </div>
-              <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;">
-                Centro de Seguridad, Identidades y Control de Acceso
-              </div>
-            </td>
-            <td align="right">
-              <span style="display:inline-block; padding:4px 10px; background-color:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; border-radius:4px; border:1px solid #f87171;">
-                CONFIDENCIAL
-              </span>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:32px;">
-        <h2 style="margin:0 0 16px 0; font-size:19px; font-weight:700; color:#1e293b;">
-          Bienvenido/a al Sistema de Gestión, {display_name}
-        </h2>
-        <p style="margin:0 0 16px 0; font-size:14.5px; line-height:1.6; color:#334155;">
-          Se ha dado de alta su cuenta de acceso institucional en <strong>AZZEN SPF</strong> vinculada a su número de credencial:
-        </p>
-        <div style="background-color:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; padding:12px 16px; margin:0 0 24px 0; font-size:14px; color:#1e293b;">
-          <strong>Credencial asignada:</strong> <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:700; color:#0f172a;">{credential}</code>
-        </div>
-        <p style="margin:0 0 16px 0; font-size:14.5px; line-height:1.6; color:#334155;">
-          Conforme a las directrices de seguridad <strong>ISO/IEC 27001</strong> y la política de identidades institucional, es requisito obligatorio validar su correo electrónico corporativo. Su código de verificación temporal es:
-        </p>
-        
-        <!-- Código Destacado -->
-        <div style="background-color:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:20px; text-align:center; margin:24px 0;">
-          <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#9a3412; margin-bottom:8px;">
-            Código de Verificación Temporal
-          </div>
-          <div style="font-family:'Courier New', Courier, monospace; font-size:36px; font-weight:800; letter-spacing:8px; color:#c2410c;">
-            {code}
-          </div>
-          <div style="font-size:12px; color:#78350f; margin-top:8px;">
-            Válido por 15 minutos · Un solo uso
-          </div>
-        </div>
-
-        <!-- Botón de Verificación Directa -->
-        <div style="text-align:center; margin:28px 0 24px 0;">
-          <a href="{V_30006}" style="display:inline-block; padding:12px 28px; background-color:#E95420; color:#ffffff; font-size:14.5px; font-weight:700; text-decoration:none; border-radius:6px; box-shadow:0 2px 4px rgba(233,84,32,0.3);">
-            ✓ Verificar mi Correo Electrónico
-          </a>
-        </div>
-        <p style="margin:0 0 8px 0; font-size:12px; color:#64748b; text-align:center;">
-          O copie y pegue el siguiente enlace en su navegador:<br>
-          <a href="{V_30006}" style="color:#0284c7; word-break:break-all;">{V_30006}</a>
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:20px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0; font-size:11.5px; color:#64748b; line-height:1.5;">
-        <strong>Aviso de Seguridad:</strong> Este mensaje fue enviado automáticamente por el Centro de Seguridad de AZZEN SPF. El código temporal está protegido con cifrado criptográfico SHA-256. Nunca comparta su contraseña ni este código con terceros.
-      </td>
-    </tr>
-  </table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px; margin:0 auto; background-color:#ffffff; border-radius:8px; border:1px solid #e2e8f0; border-top:5px solid #E95420; box-shadow:0 4px 6px -1px rgba(0,0,0,0.06); overflow:hidden;">
+<tr>
+<td style="padding:28px 32px; background-color:#fafafa; border-bottom:1px solid #e2e8f0;">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+<td>
+<div style="font-size:24px; font-weight:900; letter-spacing:-0.5px;">
+<span style="color:#E95420;">AZZEN</span>
+<span style="color:#0f172a;">SPF</span>
+</div>
+<div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;">
+Centro de Seguridad, Identidades y Control de Acceso
+</div>
+</td>
+<td align="right">
+<span style="display:inline-block; padding:4px 10px; background-color:#fee2e2; color:#991b1b; font-size:11px; font-weight:700; border-radius:4px; border:1px solid #f87171;">
+CONFIDENCIAL
+</span>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td style="padding:32px;">
+<h2 style="margin:0 0 16px 0; font-size:19px; font-weight:700; color:#1e293b;">
+Bienvenido/a al Sistema de Gestión, {display_name}
+</h2>
+<p style="margin:0 0 16px 0; font-size:14.5px; line-height:1.6; color:#334155;">
+Se ha dado de alta su cuenta de acceso institucional en <strong>AZZEN SPF</strong> vinculada a su número de credencial:
+</p>
+<div style="background-color:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; padding:12px 16px; margin:0 0 24px 0; font-size:14px; color:#1e293b;">
+<strong>Credencial asignada:</strong> <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:700; color:#0f172a;">{credential}</code>
+</div>
+<p style="margin:0 0 16px 0; font-size:14.5px; line-height:1.6; color:#334155;">
+Conforme a las directrices de seguridad <strong>ISO/IEC 27001</strong> y la política de identidades institucional, es requisito obligatorio validar su correo electrónico corporativo. Su código de verificación temporal es:
+</p>
+<!-- Código Destacado -->
+<div style="background-color:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:20px; text-align:center; margin:24px 0;">
+<div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#9a3412; margin-bottom:8px;">
+Código de Verificación Temporal
+</div>
+<div style="font-family:'Courier New', Courier, monospace; font-size:36px; font-weight:800; letter-spacing:8px; color:#c2410c;">
+{code}
+</div>
+<div style="font-size:12px; color:#78350f; margin-top:8px;">
+Válido por 15 minutos · Un solo uso
+</div>
+</div>
+<!-- Botón de Verificación Directa -->
+<div style="text-align:center; margin:28px 0 24px 0;">
+<a href="{V_30006}" style="display:inline-block; padding:12px 28px; background-color:#E95420; color:#ffffff; font-size:14.5px; font-weight:700; text-decoration:none; border-radius:6px; box-shadow:0 2px 4px rgba(233,84,32,0.3);">
+✓ Verificar mi Correo Electrónico
+</a>
+</div>
+<p style="margin:0 0 8px 0; font-size:12px; color:#64748b; text-align:center;">
+O copie y pegue el siguiente enlace en su navegador:<br>
+<a href="{V_30006}" style="color:#0284c7; word-break:break-all;">{V_30006}</a>
+</p>
+</td>
+</tr>
+<tr>
+<td style="padding:20px 32px; background-color:#f8fafc; border-top:1px solid #e2e8f0; font-size:11.5px; color:#64748b; line-height:1.5;">
+<strong>Aviso de Seguridad:</strong> Este mensaje fue enviado automáticamente por el Centro de Seguridad de AZZEN SPF. El código temporal está protegido con cifrado criptográfico SHA-256. Nunca comparta su contraseña ni este código con terceros.
+</td>
+</tr>
+</table>
 </body>
 </V_30008>"#,
-        display_name = display_name,
-        credential = credential,
-        code = code,
-        V_30006 = V_30006
-    );
-
-    send_email(to_email, display_name, subject, &V_30008, cfg).await
+display_name = display_name,
+credential = credential,
+code = code,
+V_30006 = V_30006
+);
+send_email(to_email, display_name, subject, &V_30008, cfg).await
 }
-
-/// Envía el código temporal de segundo factor (2FA) para el inicio de sesión.
-pub async fn send_2fa_login_email(
-    to_email: &str,
-    display_name: &str,
-    credential: &str,
-    code: &str,
-    ip_origen: &str,
-    cfg: &AppConfig,
+pub async fn _f(
+to_email: &str,
+display_name: &str,
+credential: &str,
+code: &str,
+ip_origen: &str,
+cfg: &AppConfig,
 ) -> Result<(), String> {
-    let V_30007 = "AZZEN SPF — Código de Autenticación de Dos Pasos (2FA)";
-
-    let V_30008 = format!(
-        r#"<!DOCTYPE V_30008>
+let _v = "AZZEN SPF — Código de Autenticación de Dos Pasos (2FA)";
+let _v = format!(
+r#"<!DOCTYPE V_30008>
 <V_30008 lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Código 2FA - AZZEN SPF</title>
+<meta charset="utf-8">
+<title>Código 2FA - AZZEN SPF</title>
 </head>
 <body style="margin:0; padding:24px 0; background-color:#f1f5f9; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a;">
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:540px; margin:0 auto; background-color:#ffffff; border-radius:8px; border:1px solid #e2e8f0; border-top:5px solid #0284c7; box-shadow:0 4px 6px -1px rgba(0,0,0,0.06); overflow:hidden;">
-    <tr>
-      <td style="padding:24px 30px; background-color:#fafafa; border-bottom:1px solid #e2e8f0;">
-        <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px;">
-          <span style="color:#E95420;">AZZEN</span>
-          <span style="color:#0f172a;">SPF</span>
-        </div>
-        <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;">
-          Verificación de Seguridad en Dos Pasos (2FA)
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:28px 30px;">
-        <h2 style="margin:0 0 14px 0; font-size:18px; font-weight:700; color:#1e293b;">
-          Código de Acceso para {display_name}
-        </h2>
-        <p style="margin:0 0 16px 0; font-size:14px; line-height:1.6; color:#334155;">
-          Se ha iniciado una sesión con su credencial <strong>{credential}</strong> desde la dirección IP <code>{ip_origen}</code>. Introduzca el siguiente código para completar el inicio de sesión:
-        </p>
-
-        <!-- Código 2FA Destacado -->
-        <div style="background-color:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:18px; text-align:center; margin:22px 0;">
-          <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#0369a1; margin-bottom:6px;">
-            Código de Seguridad 2FA
-          </div>
-          <div style="font-family:'Courier New', Courier, monospace; font-size:34px; font-weight:800; letter-spacing:8px; color:#0284c7;">
-            {code}
-          </div>
-          <div style="font-size:11.5px; color:#075985; margin-top:6px;">
-            Válido durante los próximos 5 minutos
-          </div>
-        </div>
-
-        <p style="margin:0; font-size:13px; line-height:1.5; color:#64748b;">
-          Si usted no solicitó este código o no reconoce la solicitud de acceso, comuníquese inmediatamente con el Administrador Técnico de Seguridad de su unidad.
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:16px 30px; background-color:#f8fafc; border-top:1px solid #e2e8f0; font-size:11.5px; color:#64748b;">
-        Servicio Penitenciario Federal · Dirección de Informática y Comunicaciones
-      </td>
-    </tr>
-  </table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:540px; margin:0 auto; background-color:#ffffff; border-radius:8px; border:1px solid #e2e8f0; border-top:5px solid #0284c7; box-shadow:0 4px 6px -1px rgba(0,0,0,0.06); overflow:hidden;">
+<tr>
+<td style="padding:24px 30px; background-color:#fafafa; border-bottom:1px solid #e2e8f0;">
+<div style="font-size:22px; font-weight:900; letter-spacing:-0.5px;">
+<span style="color:#E95420;">AZZEN</span>
+<span style="color:#0f172a;">SPF</span>
+</div>
+<div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;">
+Verificación de Seguridad en Dos Pasos (2FA)
+</div>
+</td>
+</tr>
+<tr>
+<td style="padding:28px 30px;">
+<h2 style="margin:0 0 14px 0; font-size:18px; font-weight:700; color:#1e293b;">
+Código de Acceso para {display_name}
+</h2>
+<p style="margin:0 0 16px 0; font-size:14px; line-height:1.6; color:#334155;">
+Se ha iniciado una sesión con su credencial <strong>{credential}</strong> desde la dirección IP <code>{ip_origen}</code>. Introduzca el siguiente código para completar el inicio de sesión:
+</p>
+<!-- Código 2FA Destacado -->
+<div style="background-color:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:18px; text-align:center; margin:22px 0;">
+<div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:#0369a1; margin-bottom:6px;">
+Código de Seguridad 2FA
+</div>
+<div style="font-family:'Courier New', Courier, monospace; font-size:34px; font-weight:800; letter-spacing:8px; color:#0284c7;">
+{code}
+</div>
+<div style="font-size:11.5px; color:#075985; margin-top:6px;">
+Válido durante los próximos 5 minutos
+</div>
+</div>
+<p style="margin:0; font-size:13px; line-height:1.5; color:#64748b;">
+Si usted no solicitó este código o no reconoce la solicitud de acceso, comuníquese inmediatamente con el Administrador Técnico de Seguridad de su unidad.
+</p>
+</td>
+</tr>
+<tr>
+<td style="padding:16px 30px; background-color:#f8fafc; border-top:1px solid #e2e8f0; font-size:11.5px; color:#64748b;">
+Servicio Penitenciario Federal · Dirección de Informática y Comunicaciones
+</td>
+</tr>
+</table>
 </body>
 </V_30008>"#,
-        display_name = display_name,
-        credential = credential,
-        code = code,
-        ip_origen = ip_origen
-    );
-
-    send_email(to_email, display_name, subject, &V_30008, cfg).await
+display_name = display_name,
+credential = credential,
+code = code,
+ip_origen = ip_origen
+);
+send_email(to_email, display_name, subject, &V_30008, cfg).await
 }
-
-/// Envía un correo de prueba para verificar la configuración SMTP desde la interfaz.
-pub async fn send_test_email(to_email: &str, cfg: &AppConfig) -> Result<(), String> {
-    let V_30007 = "AZZEN SPF — Prueba de Conexión SMTP Exitosa";
-    let V_30008 = format!(
-        r#"<!DOCTYPE V_30008>
+pub async fn _f(to_email: &str, cfg: &AppConfig) -> Result<(), String> {
+let _v = "AZZEN SPF — Prueba de Conexión SMTP Exitosa";
+let _v = format!(
+r#"<!DOCTYPE V_30008>
 <V_30008>
 <body style="font-family:sans-serif; background:#f8fafc; padding:24px;">
-  <div style="max-width:500px; margin:0 auto; background:#fff; border:1px solid #e2e8f0; border-top:4px solid #16a34a; border-radius:8px; padding:24px;">
-    <h2 style="color:#166534; margin:0 0 12px 0;">✓ Conexión SMTP Operativa</h2>
-    <p style="color:#334155; font-size:14px; line-height:1.6;">
-      La configuración de correo saliente del servidor <strong>AZZEN SPF</strong> ({smtp_host}:{smtp_port}) funciona correctamente.
-    </p>
-    <div style="background:#f1f5f9; padding:12px; border-radius:6px; font-size:13px; color:#475569;">
-      <strong>Remitente configurado:</strong> {from}<br>
-      <strong>Servidor:</strong> {smtp_host}:{smtp_port}
-    </div>
-  </div>
+<div style="max-width:500px; margin:0 auto; background:#fff; border:1px solid #e2e8f0; border-top:4px solid #16a34a; border-radius:8px; padding:24px;">
+<h2 style="color:#166534; margin:0 0 12px 0;">✓ Conexión SMTP Operativa</h2>
+<p style="color:#334155; font-size:14px; line-height:1.6;">
+La configuración de correo saliente del servidor <strong>AZZEN SPF</strong> ({smtp_host}:{smtp_port}) funciona correctamente.
+</p>
+<div style="background:#f1f5f9; padding:12px; border-radius:6px; font-size:13px; color:#475569;">
+<strong>Remitente configurado:</strong> {from}<br>
+<strong>Servidor:</strong> {smtp_host}:{smtp_port}
+</div>
+</div>
 </body>
 </V_30008>"#,
-        smtp_host = cfg.smtp_host,
-        smtp_port = cfg.smtp_port,
-        from = cfg.smtp_from
-    );
-
-    send_email(to_email, "Administrador", V_30007, &V_30008, cfg).await
+smtp_host = cfg.smtp_host,
+smtp_port = cfg.smtp_port,
+from = cfg.smtp_from
+);
+send_email(to_email, "Administrador", V_30007, &V_30008, cfg).await
 }
-
-/// Envía el correo para restablecer la contraseña con token único y vencimiento corto (15 min).
-pub async fn send_password_reset_email(
-    to_email: &str,
-    display_name: &str,
-    credential: &str,
-    token: &str,
-    cfg: &AppConfig,
+pub async fn _f(
+to_email: &str,
+display_name: &str,
+credential: &str,
+token: &str,
+cfg: &AppConfig,
 ) -> Result<(), String> {
-    let V_30009 = format!("{}/recuperar-password/confirmar?token={}", cfg.app_base_url, token);
-    let V_30007 = "AZZEN SPF — Solicitud de Restablecimiento de Contraseña";
-    let V_30008 = format!(
-        r#"<!DOCTYPE V_30008>
+let _v = format!("{}/recuperar-password/confirmar?token={}", cfg.app_base_url, token);
+let _v = "AZZEN SPF — Solicitud de Restablecimiento de Contraseña";
+let _v = format!(
+r#"<!DOCTYPE V_30008>
 <V_30008 lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Restablecimiento de Contraseña - AZZEN SPF</title>
+<meta charset="utf-8">
+<title>Restablecimiento de Contraseña - AZZEN SPF</title>
 </head>
 <body style="margin:0; padding:24px 0; background-color:#f1f5f9; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a;">
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px; margin:0 auto; background-color:#ffffff; border-radius:8px; border:1px solid #e2e8f0; border-top:5px solid #E95420; box-shadow:0 4px 6px -1px rgba(0,0,0,0.06); overflow:hidden;">
-    <tr>
-      <td style="padding:28px 30px 20px 30px;">
-        <h2 style="margin:0 0 12px 0; font-size:20px; font-weight:700; color:#0f172a;">
-          Solicitud de Restablecimiento de Contraseña
-        </h2>
-        <p style="margin:0 0 14px 0; font-size:14px; line-height:1.5; color:#334155;">
-          Estimado/a <strong>{display_name}</strong> (Credencial: <code>{credential}</code>):
-        </p>
-        <p style="margin:0 0 18px 0; font-size:13.5px; line-height:1.5; color:#475569;">
-          Hemos recibido una solicitud para restablecer la contraseña de acceso a su cuenta en <strong>AZZEN SPF</strong>. Si usted realizó esta solicitud, haga clic en el siguiente botón para establecer una nueva contraseña:
-        </p>
-        <div style="text-align:center; margin:24px 0;">
-          <a href="{V_30009}" style="background-color:#E95420; color:#ffffff; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:700; font-size:14px; display:inline-block;">
-            Restablecer Mi Contraseña
-          </a>
-        </div>
-        <p style="margin:0 0 10px 0; font-size:12px; color:#64748b; line-height:1.4;">
-          Este enlace tiene una vigencia de <strong>15 minutos</strong> y solo puede utilizarse una vez. Si el botón no funciona, copie y pegue la siguiente URL en su navegador:
-        </p>
-        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; padding:8px 12px; font-family:monospace; font-size:11.5px; word-break:break-all; color:#0369a1; margin-bottom:18px;">
-          {V_30009}
-        </div>
-        <p style="margin:0; font-size:12px; line-height:1.5; color:#94a3b8;">
-          Si usted no solicitó el restablecimiento, ignore este mensaje. Su contraseña actual permanece inalterada.
-        </p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:16px 30px; background-color:#f8fafc; border-top:1px solid #e2e8f0; font-size:11.5px; color:#64748b;">
-        Servicio Penitenciario Federal · Centro de Seguridad y Control de Acceso
-      </td>
-    </tr>
-  </table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px; margin:0 auto; background-color:#ffffff; border-radius:8px; border:1px solid #e2e8f0; border-top:5px solid #E95420; box-shadow:0 4px 6px -1px rgba(0,0,0,0.06); overflow:hidden;">
+<tr>
+<td style="padding:28px 30px 20px 30px;">
+<h2 style="margin:0 0 12px 0; font-size:20px; font-weight:700; color:#0f172a;">
+Solicitud de Restablecimiento de Contraseña
+</h2>
+<p style="margin:0 0 14px 0; font-size:14px; line-height:1.5; color:#334155;">
+Estimado/a <strong>{display_name}</strong> (Credencial: <code>{credential}</code>):
+</p>
+<p style="margin:0 0 18px 0; font-size:13.5px; line-height:1.5; color:#475569;">
+Hemos recibido una solicitud para restablecer la contraseña de acceso a su cuenta en <strong>AZZEN SPF</strong>. Si usted realizó esta solicitud, haga clic en el siguiente botón para establecer una nueva contraseña:
+</p>
+<div style="text-align:center; margin:24px 0;">
+<a href="{V_30009}" style="background-color:#E95420; color:#ffffff; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:700; font-size:14px; display:inline-block;">
+Restablecer Mi Contraseña
+</a>
+</div>
+<p style="margin:0 0 10px 0; font-size:12px; color:#64748b; line-height:1.4;">
+Este enlace tiene una vigencia de <strong>15 minutos</strong> y solo puede utilizarse una vez. Si el botón no funciona, copie y pegue la siguiente URL en su navegador:
+</p>
+<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px; padding:8px 12px; font-family:monospace; font-size:11.5px; word-break:break-all; color:#0369a1; margin-bottom:18px;">
+{V_30009}
+</div>
+<p style="margin:0; font-size:12px; line-height:1.5; color:#94a3b8;">
+Si usted no solicitó el restablecimiento, ignore este mensaje. Su contraseña actual permanece inalterada.
+</p>
+</td>
+</tr>
+<tr>
+<td style="padding:16px 30px; background-color:#f8fafc; border-top:1px solid #e2e8f0; font-size:11.5px; color:#64748b;">
+Servicio Penitenciario Federal · Centro de Seguridad y Control de Acceso
+</td>
+</tr>
+</table>
 </body>
 </V_30008>"#,
-        display_name = display_name,
-        credential = credential,
-        V_30009 = V_30009
-    );
-
-    send_email(to_email, display_name, subject, &V_30008, cfg).await
+display_name = display_name,
+credential = credential,
+V_30009 = V_30009
+);
+send_email(to_email, display_name, subject, &V_30008, cfg).await
 }
-
-/// Envía una alerta de seguridad automática al titular de la cuenta cuando se detecta y bloquea
-/// un intento de iniciar una segunda sesión simultánea.
-pub async fn send_concurrent_session_alert_email(
-    to_email: &str,
-    display_name: &str,
-    credential: &str,
-    fecha_hora_servidor: &str,
-    dispositivo_navegador: &str,
-    ip_origen: &str,
-    cfg: &AppConfig,
+pub async fn _f(
+to_email: &str,
+display_name: &str,
+credential: &str,
+fecha_hora_servidor: &str,
+dispositivo_navegador: &str,
+ip_origen: &str,
+cfg: &AppConfig,
 ) -> Result<(), String> {
-    let V_30010 = format!("{}/recuperar-password", cfg.app_base_url);
-    let V_30007 = "AZZEN SPF — Intento de inicio de sesión adicional bloqueado";
-
-    let V_30008 = format!(
-        r#"<!DOCTYPE V_30008>
+let _v = format!("{}/recuperar-password", cfg.app_base_url);
+let _v = "AZZEN SPF — Intento de inicio de sesión adicional bloqueado";
+let _v = format!(
+r#"<!DOCTYPE V_30008>
 <V_30008 lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Alerta de Seguridad: Sesión Adicional Bloqueada - AZZEN SPF</title>
+<meta charset="utf-8">
+<title>Alerta de Seguridad: Sesión Adicional Bloqueada - AZZEN SPF</title>
 </head>
 <body style="margin:0; padding:24px 0; background-color:#f8fafc; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a;">
-  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px; margin:0 auto; background-color:#ffffff; border-radius:8px; border:1px solid #e2e8f0; border-top:5px solid #dc2626; box-shadow:0 4px 6px -1px rgba(0,0,0,0.06); overflow:hidden;">
-    <tr>
-      <td style="padding:24px 30px; background-color:#fafafa; border-bottom:1px solid #e2e8f0;">
-        <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px;">
-          <span style="color:#E95420;">AZZEN</span>
-          <span style="color:#0f172a;">SPF</span>
-        </div>
-        <div style="font-size:12px; color:#dc2626; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;">
-          Alerta de Seguridad · Política de Sesión Única
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:28px 30px;">
-        <h2 style="margin:0 0 14px 0; font-size:18px; font-weight:700; color:#991b1b;">
-          Intento de inicio de sesión adicional bloqueado
-        </h2>
-        <p style="margin:0 0 16px 0; font-size:14px; line-height:1.6; color:#334155;">
-          Hola <strong>{display_name}</strong> (Credencial: <code>{credential}</code>):<br><br>
-          Se detectó un intento de iniciar una nueva sesión en tu cuenta de <strong>AZZEN SPF</strong> mientras ya existía una sesión activa.
-        </p>
-
-        <div style="background-color:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px 18px; margin:20px 0; font-size:13.5px; line-height:1.7; color:#1e293b;">
-          <div><strong>• Fecha y hora:</strong> {fecha_hora_servidor}</div>
-          <div><strong>• Dispositivo o navegador:</strong> {dispositivo_navegador}</div>
-          <div><strong>• Red / Origen reportado:</strong> <code>{ip_origen}</code></div>
-          <div><strong>• Resultado:</strong> <span style="color:#b91c1c; font-weight:700;">Nuevo acceso bloqueado</span></div>
-        </div>
-
-        <p style="margin:0 0 14px 0; font-size:14px; font-weight:600; color:#166534;">
-          ✓ Tu sesión anterior continúa activa y protegida.
-        </p>
-
-        <p style="margin:0 0 18px 0; font-size:13.5px; line-height:1.6; color:#475569;">
-          Si reconocés el intento, podés continuar utilizando tu sesión actual o cerrarla antes de cambiar de equipo. Si <strong>no lo reconocés</strong>, cambiá inmediatamente tu contraseña y revisá la seguridad de tu cuenta mediante los procedimientos oficiales de AZZEN SPF.
-        </p>
-
-        <div style="text-align:center; margin:22px 0 10px 0;">
-          <a href="{V_30010}" style="background-color:#E95420; color:#ffffff; padding:11px 22px; border-radius:6px; text-decoration:none; font-weight:700; font-size:13.5px; display:inline-block;">
-            Cambiar Contraseña / Procedimiento Oficial de Seguridad
-          </a>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:16px 30px; background-color:#f8fafc; border-top:1px solid #e2e8f0; font-size:11.5px; color:#64748b;">
-        Servicio Penitenciario Federal · Centro de Seguridad, Identidades y Control de Acceso
-      </td>
-    </tr>
-  </table>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px; margin:0 auto; background-color:#ffffff; border-radius:8px; border:1px solid #e2e8f0; border-top:5px solid #dc2626; box-shadow:0 4px 6px -1px rgba(0,0,0,0.06); overflow:hidden;">
+<tr>
+<td style="padding:24px 30px; background-color:#fafafa; border-bottom:1px solid #e2e8f0;">
+<div style="font-size:22px; font-weight:900; letter-spacing:-0.5px;">
+<span style="color:#E95420;">AZZEN</span>
+<span style="color:#0f172a;">SPF</span>
+</div>
+<div style="font-size:12px; color:#dc2626; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px;">
+Alerta de Seguridad · Política de Sesión Única
+</div>
+</td>
+</tr>
+<tr>
+<td style="padding:28px 30px;">
+<h2 style="margin:0 0 14px 0; font-size:18px; font-weight:700; color:#991b1b;">
+Intento de inicio de sesión adicional bloqueado
+</h2>
+<p style="margin:0 0 16px 0; font-size:14px; line-height:1.6; color:#334155;">
+Hola <strong>{display_name}</strong> (Credencial: <code>{credential}</code>):<br><br>
+Se detectó un intento de iniciar una nueva sesión en tu cuenta de <strong>AZZEN SPF</strong> mientras ya existía una sesión activa.
+</p>
+<div style="background-color:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px 18px; margin:20px 0; font-size:13.5px; line-height:1.7; color:#1e293b;">
+<div><strong>• Fecha y hora:</strong> {fecha_hora_servidor}</div>
+<div><strong>• Dispositivo o navegador:</strong> {dispositivo_navegador}</div>
+<div><strong>• Red / Origen reportado:</strong> <code>{ip_origen}</code></div>
+<div><strong>• Resultado:</strong> <span style="color:#b91c1c; font-weight:700;">Nuevo acceso bloqueado</span></div>
+</div>
+<p style="margin:0 0 14px 0; font-size:14px; font-weight:600; color:#166534;">
+✓ Tu sesión anterior continúa activa y protegida.
+</p>
+<p style="margin:0 0 18px 0; font-size:13.5px; line-height:1.6; color:#475569;">
+Si reconocés el intento, podés continuar utilizando tu sesión actual o cerrarla antes de cambiar de equipo. Si <strong>no lo reconocés</strong>, cambiá inmediatamente tu contraseña y revisá la seguridad de tu cuenta mediante los procedimientos oficiales de AZZEN SPF.
+</p>
+<div style="text-align:center; margin:22px 0 10px 0;">
+<a href="{V_30010}" style="background-color:#E95420; color:#ffffff; padding:11px 22px; border-radius:6px; text-decoration:none; font-weight:700; font-size:13.5px; display:inline-block;">
+Cambiar Contraseña / Procedimiento Oficial de Seguridad
+</a>
+</div>
+</td>
+</tr>
+<tr>
+<td style="padding:16px 30px; background-color:#f8fafc; border-top:1px solid #e2e8f0; font-size:11.5px; color:#64748b;">
+Servicio Penitenciario Federal · Centro de Seguridad, Identidades y Control de Acceso
+</td>
+</tr>
+</table>
 </body>
 </V_30008>"#,
-        display_name = display_name,
-        credential = credential,
-        fecha_hora_servidor = fecha_hora_servidor,
-        dispositivo_navegador = dispositivo_navegador,
-        ip_origen = ip_origen,
-        V_30010 = V_30010
-    );
-
-    send_email(to_email, display_name, subject, &V_30008, cfg).await
+display_name = display_name,
+credential = credential,
+fecha_hora_servidor = fecha_hora_servidor,
+dispositivo_navegador = dispositivo_navegador,
+ip_origen = ip_origen,
+V_30010 = V_30010
+);
+send_email(to_email, display_name, subject, &V_30008, cfg).await
 }
