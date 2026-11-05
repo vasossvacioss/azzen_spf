@@ -13,3 +13,7 @@ target/
 .env
 *.log
 scripts/
+*.xcconfig
+*.sql
+app spf/
+EJEMPLOS_QUERIES_MODULOS.sql
