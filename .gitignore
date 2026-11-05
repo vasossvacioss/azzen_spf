@@ -17,3 +17,23 @@ scripts/
 *.sql
 app spf/
 EJEMPLOS_QUERIES_MODULOS.sql
+*.bak
+*.backup
+*.cache
+*.tmp
+*.temp
+**/backup*/
+**/scratch/
+**/test*/
+**/example*/
+**/.vscode/
+**/.idea/
+**/__pycache__/
+**/.pytest_cache/
+**/.coverage
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
