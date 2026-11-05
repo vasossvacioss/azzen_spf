@@ -1,0 +1,30 @@
+import 'package:flutter/cupertino.dart';
+class AzzenColors {
+  static const Color background = Color(0xFFFFFFFF);
+  static const Color surfaceSecondary = Color(0xFFF8F9FA);
+  static const Color surfaceElevated = Color(0xFFFFFFFF);
+  static const Color surfaceCard = Color(0xFFFFFFFF);
+  static const Color textPrimary = Color(0xFF0F172A);
+  static const Color textSecondary = Color(0xFF475569);
+  static const Color textMuted = Color(0xFF94A3B8);
+  static const Color primary = Color(0xFFE95420);
+  static const Color primaryDark = Color(0xFFC74316);
+  static const Color primaryLight = Color(0xFFFFF1EB);
+  static const Color navy = Color(0xFF1E293B);
+  static const Color navyDark = Color(0xFF0F172A);
+  static const Color navyLight = Color(0xFFF1F5F9);
+  static const Color border = Color(0xFFE2E8F0);
+  static const Color borderLight = Color(0xFFF1F5F9);
+  static const Color success = Color(0xFF10B981);
+  static const Color successBackground = Color(0xFFECFDF5);
+  static const Color successText = Color(0xFF065F46);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color warningBackground = Color(0xFFFFFBEB);
+  static const Color warningText = Color(0xFF92400E);
+  static const Color danger = Color(0xFFEF4444);
+  static const Color dangerBackground = Color(0xFFFEF2F2);
+  static const Color dangerText = Color(0xFF991B1B);
+  static const Color info = Color(0xFF3B82F6);
+  static const Color infoBackground = Color(0xFFEFF6FF);
+  static const Color infoText = Color(0xFF1E40AF);
+}

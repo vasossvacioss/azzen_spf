@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Suspensión Preventiva #{{ susp.id }} · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/style.css?v=20261025_11" />
+  </head>
+  <body>
+        <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <div class="notif-wrapper" style="position:relative;">
+          <button id="notif-bell-btn" class="notif-bell-btn" type="button" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
+            🔔
+            <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+            <div class="notif-dropdown-header">
+              <span style="font-weight:700;">Notificaciones</span>
+              <a href="javascript:void(0)" onclick="marcarTodasLeidas()" style="font-size:12px; color:var(--azzen-orange);">Marcar leídas</a>
+            </div>
+            <div id="notif-items-list" class="notif-items-list">
+              <div class="notif-empty">Cargando...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="/notificaciones">Ver todas las notificaciones →</a>
+            </div>
+          </div>
+        </div>
+
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+            <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item active">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+          <a href="/notificaciones" class="nav-item">
+            <span>🔔</span> Notificaciones
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          {% for f in nav_files %}
+          <details>
+            <summary>📊 {{ f.file_name }}</summary>
+            <div class="subnav">
+              {% for s in f.sheets %}
+              <a href="/fuente/{{ f.file_id }}/hoja/{{ s.sheet_id }}">{{ s.sheet_name }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Búsqueda global
+          </a>
+          <a href="/personas" class="nav-item">
+            <span>👥</span> Personas
+          </a>
+          <a href="/staging" class="nav-item">
+            <span>⚠️</span> Staging sin credencial
+          </a>
+          <a href="/modulos" class="nav-item">
+            <span>📦</span> Catálogo de Módulos
+          </a>
+          <a href="/modulos/dashboard" class="nav-item">
+            <span>📊</span> Dashboard Estadístico
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Auditoría y Sistema</div>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🧹</span> Calidad de Datos
+          </a>
+          <a href="/administracion/versiones" class="nav-item">
+            <span>📜</span> Control de versiones
+          </a>
+          <a href="/seguridad" class="nav-item">
+            <span>🛡️</span> Centro de Seguridad
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/suspensiones">Control de Suspensiones</a></li>
+            <li class="is-active"><a href="#">Ficha Técnica #{{ susp.id }}</a></li>
+          </ul>
+        </div>
+
+        <div class="mc-header-bar">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span class="mc-badge {% if susp.estado == "Vigente" %}estado-rechazada{% else %}estado-aprobada{% endif %}">
+                {{ susp.estado }}
+              </span>
+              <h1 class="mc-header-title" style="display:inline-flex;">
+                Suspensión Preventiva #{{ susp.id }} · {{ susp.nombre_completo }}
+              </h1>
+            </div>
+            <p class="mc-header-subtitle">
+              Credencial: <strong>{{ susp.credencial }}</strong> · 
+              Inicio: <strong>{{ susp.fecha_inicio }}</strong> · 
+              Encuadre: <strong>Artículo 419 {{ susp.articulo_419_incisos }}</strong>
+            </p>
+          </div>
+          <div class="mc-header-actions">
+            <a href="/suspensiones" class="button is-dark is-outlined btn-sm">← Volver al listado</a>
+            <a href="/agentes/{{ susp.credencial }}/historial" class="button is-azzen btn-sm">👤 Ver Legajo del Agente</a>
+          </div>
+        </div>
+
+        {% if let Some(msg) = success_msg %}
+        <div class="alert-success">✓ {{ msg }}</div>
+        {% endif %}
+        {% if let Some(err) = error_msg %}
+        <div class="alert-error">✕ {{ err }}</div>
+        {% endif %}
+
+        <div class="meta-summary-bar">
+          <div class="meta-chip">
+            <span class="meta-chip-label">Días Transcurridos:</span>
+            <span class="meta-chip-value"><strong>{{ dias_transcurridos }}</strong> días</span>
+          </div>
+          <div class="meta-chip">
+            <span class="meta-chip-label">Vencimiento 60 días:</span>
+            <span class="meta-chip-value">{{ vencimiento_60 }}</span>
+          </div>
+          <div class="meta-chip">
+            <span class="meta-chip-label">Vencimiento 120 días:</span>
+            <span class="meta-chip-value">{{ vencimiento_120 }}</span>
+          </div>
+          <div class="meta-chip">
+            <span class="meta-chip-label">Usuario Responsable:</span>
+            <span class="meta-chip-value">{{ susp.usuario }}</span>
+          </div>
+        </div>
+
+        <!-- CUADRO GENERAL DE LA FICHA -->
+        <div class="form-card" style="padding:20px; margin-bottom:20px;">
+          <h2 style="margin:0 0 16px 0; font-size:17px; color:var(--azzen-dark); border-bottom:1.5px solid var(--azzen-border); padding-bottom:8px;">
+            1. Datos del Agente Afectado y Actuación Sumarial
+          </h2>
+
+          <div class="investigar-grid-fields" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom:16px;">
+            <div class="investigar-field-item">
+              <span class="investigar-field-label">Nombre Completo del Agente</span>
+              <span class="investigar-field-val"><strong>{{ susp.nombre_completo }}</strong></span>
+            </div>
+            <div class="investigar-field-item">
+              <span class="investigar-field-label">Credencial Institucional</span>
+              <span class="investigar-field-val">
+                <a href="/agentes/{{ susp.credencial }}/historial" style="font-weight:700; color:var(--azzen-orange);">
+                  {{ susp.credencial }} ↗
+                </a>
+              </span>
+            </div>
+            <div class="investigar-field-item">
+              <span class="investigar-field-label">Expediente Asociado</span>
+              <span class="investigar-field-val">
+                {% if let Some(exp_id) = susp.expediente_id %}
+                <a href="/expedientes/{{ exp_id }}" style="font-family:'Ubuntu Mono',monospace; font-weight:700; color:var(--azzen-dark);">
+                  {{ expediente_numero.as_deref().unwrap_or("Ver expediente") }} ↗
+                </a>
+                {% else %}
+                <span class="muted">Sin vincular a expediente formal</span>
+                {% endif %}
+              </span>
+            </div>
+            <div class="investigar-field-item">
+              <span class="investigar-field-label">Fecha de Inicio de Medida</span>
+              <span class="investigar-field-val">{{ susp.fecha_inicio }}</span>
+            </div>
+          </div>
+
+          {% if let Some(caratula) = expediente_caratula %}
+          <div class="investigar-text-card" style="margin-bottom:16px;">
+            <div class="investigar-text-title">
+              <span>📋 Carátula / Motivo del Expediente Vinculado</span>
+            </div>
+            <div class="investigar-text-content" style="white-space:pre-wrap;">{{ caratula }}</div>
+          </div>
+          {% endif %}
+
+          <h2 style="margin:20px 0 16px 0; font-size:17px; color:var(--azzen-dark); border-bottom:1.5px solid var(--azzen-border); padding-bottom:8px;">
+            2. Encuadre Jurídico y Documentación de Inicio
+          </h2>
+
+          <div class="investigar-grid-fields" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom:16px;">
+            <div class="investigar-field-item">
+              <span class="investigar-field-label">Artículo Aplicable</span>
+              <span class="investigar-field-val">Artículo 419 Inciso {{ susp.articulo_419_incisos }}</span>
+            </div>
+            <div class="investigar-field-item">
+              <span class="investigar-field-label">Documento Disposición de Inicio</span>
+              <span class="investigar-field-val">
+                {% if let Some(doc) = susp.archivo_disposicion_pdf %}
+                <a href="/documentos/{{ doc }}" target="_blank" class="button is-dark is-outlined btn-sm" style="display:inline-flex; align-items:center; gap:4px;">
+                  📄 Descargar Disposición PDF ↗
+                </a>
+                {% else %}
+                <span class="muted">Sin documento PDF adjunto</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+
+          {% if let Some(obs) = susp.observaciones %}
+          {% if !obs.is_empty() %}
+          <div class="investigar-text-card" style="margin-bottom:16px;">
+            <div class="investigar-text-title">
+              <span>📝 Observaciones / Antecedentes de la Medida</span>
+            </div>
+            <div class="investigar-text-content" style="white-space:pre-wrap;">{{ obs }}</div>
+          </div>
+          {% endif %}
+          {% endif %}
+
+          <h2 style="margin:20px 0 16px 0; font-size:17px; color:var(--azzen-dark); border-bottom:1.5px solid var(--azzen-border); padding-bottom:8px;">
+            3. Estado de la Medida y Levantamiento
+          </h2>
+
+          {% if susp.estado == "Vigente" %}
+          <div class="alert-warning" style="margin-bottom:16px;">
+            <strong>⚠️ Medida Cautelar Activa:</strong> Esta suspensión preventiva se encuentra actualmente <strong>Vigente</strong>.
+          </div>
+
+          <form method="post" action="/suspensiones/{{ susp.id }}/levantar" enctype="multipart/form-data" style="background:#fffaf7; border:1px solid #fed7aa; border-radius:6px; padding:18px;">
+            <h3 style="margin:0 0 12px 0; font-size:15px; color:#9a3412;">⚖️ Registrar Levantamiento o Conclusión Formal</h3>
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label>Estado Final *</label>
+                <select name="estado" required>
+                  <option value="Levantada">Levantada (Reincorporación al servicio)</option>
+                  <option value="Concluida por Cierre">Concluida por Resolución Final</option>
+                  <option value="Baja">Concluida por Baja del Agente</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Fecha Efectiva de Conclusión *</label>
+                <input name="fecha_fin" type="date" required />
+              </div>
+            </div>
+            <div class="form-field" style="margin-top:10px;">
+              <label>Motivo Administrativo de la Conclusión *</label>
+              <input name="motivo_fin" placeholder="Ej: Cumplimiento del plazo máximo legal / Dictado de resolución..." required />
+            </div>
+            <div class="form-field" style="margin-top:10px;">
+              <label>Fundamentación Jurídica / Número de Disposición *</label>
+              <textarea name="fundamento_fin" rows="3" placeholder="Detalle la fundamentación o disposición de levantamiento..." required></textarea>
+            </div>
+            <div class="form-field" style="margin-top:10px;">
+              <label>Adjuntar Disposición de Levantamiento (PDF)</label>
+              <input name="archivo_pdf" type="file" accept=".pdf" />
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+              <button type="submit" class="btn-primary">Confirmar Levantamiento</button>
+            </div>
+          </form>
+          {% else %}
+          <div class="investigar-grid-fields" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom:16px;">
+            <div class="investigar-field-item">
+              <span class="investigar-field-label">Fecha de Conclusión</span>
+              <span class="investigar-field-val">{{ susp.fecha_fin.as_deref().unwrap_or("—") }}</span>
+            </div>
+            <div class="investigar-field-item">
+              <span class="investigar-field-label">Documento de Levantamiento</span>
+              <span class="investigar-field-val">
+                {% if let Some(doc) = susp.archivo_levantamiento_pdf %}
+                <a href="/documentos/{{ doc }}" target="_blank" class="button is-dark is-outlined btn-sm" style="display:inline-flex; align-items:center; gap:4px;">
+                  📄 Descargar PDF de Levantamiento ↗
+                </a>
+                {% else %}
+                <span class="muted">Sin archivo PDF</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+
+          {% if let Some(mot) = susp.motivo_fin %}
+          <div class="investigar-text-card" style="margin-bottom:12px;">
+            <div class="investigar-text-title"><span>📝 Motivo de Conclusión</span></div>
+            <div class="investigar-text-content">{{ mot }}</div>
+          </div>
+          {% endif %}
+
+          {% if let Some(fund) = susp.fundamento_fin %}
+          <div class="investigar-text-card">
+            <div class="investigar-text-title"><span>⚖️ Fundamentación de la Conclusión</span></div>
+            <div class="investigar-text-content" style="white-space:pre-wrap;">{{ fund }}</div>
+          </div>
+          {% endif %}
+          {% endif %}
+        </div>
+      </main>
+    </div>
+
+    <script src="/static/azzen.js?v=20261025_11"></script>
+  </body>
+</html>

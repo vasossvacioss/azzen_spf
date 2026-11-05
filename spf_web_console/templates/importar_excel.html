@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Importación y Extracción Excel – AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/style.css?v=20261025_11" />
+    <style>
+      .import-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+      }
+      .import-kpi-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      }
+      .import-kpi-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+      .import-kpi-value {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.1;
+      }
+      .dropzone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 32px 20px;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: border-color 0.2s, background-color 0.2s;
+      }
+      .dropzone:hover, .dropzone.dragover {
+        border-color: var(--azzen-orange);
+        background: #fff7ed;
+      }
+      .badge-tag-nuevo {
+        background: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-weight: 700;
+      }
+      .badge-tag-existente {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <span style="font-size:13px; font-weight:600; color:#4a4a4a;">{{ user_name }}</span>
+        <a href="/logout" class="button is-small is-dark is-outlined">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item">
+            <span>⛔</span> Control de Suspensiones
+          </a>
+          <a href="/importar" class="nav-item active">
+            <span>📥</span> Importar Excel
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          <a href="/personas" class="nav-item">
+            <span>👥</span> Registros de Personas
+          </a>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🛡️</span> Calidad y Regularización
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/expedientes">Actuaciones</a></li>
+            <li class="is-active"><a href="/importar">Motor de Importación y Extracción Excel</a></li>
+          </ul>
+        </div>
+
+        <div class="mc-header-bar">
+          <div>
+            <h1 class="mc-header-title">
+              <span>📥</span>
+              <span>Motor Inteligente de Importación y Extracción Excel</span>
+            </h1>
+            <p class="mc-header-subtitle">
+              Carga, normalización y vinculación relacional de sumarios, expedientes y múltiples agentes involucrados.
+            </p>
+          </div>
+        </div>
+
+        <!-- Panel de Carga y Drag & Drop -->
+        <div class="box" style="margin-bottom:20px; background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:20px;">
+          <h3 style="margin-top:0; font-size:15px; font-weight:700; color:#1e293b; margin-bottom:12px;">
+            Paso 1: Seleccionar archivo Excel para análisis previo
+          </h3>
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('excel-file-input').click()">
+            <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display:none;" onchange="handleFileSelected(this.files)" />
+            <div style="font-size:36px; margin-bottom:8px;">📊</div>
+            <div style="font-size:14px; font-weight:700; color:#334155;" id="dropzone-text">
+              Haga clic aquí o arrastre su archivo Excel (.xlsx, .xls)
+            </div>
+            <div style="font-size:12px; color:#64748b; margin-top:4px;">
+              Reconoce automáticamente múltiples agentes por fila, columnas variantes y conserva credenciales textuales intactas.
+            </div>
+          </div>
+
+          <div style="margin-top:16px; display:flex; gap:12px; align-items:center;">
+            <button type="button" id="btn-analizar" class="button is-dark" style="font-weight:700;" onclick="ejecutarAnalisis()" disabled>
+              🔍 Analizar y Previsualizar (Dry Run)
+            </button>
+            <span id="analisis-status" style="font-size:13px; font-weight:600; color:#64748b;"></span>
+          </div>
+        </div>
+
+        <!-- Panel de Control y Métricas de Procesamiento (Inicialmente oculto) -->
+        <div id="panel-resultados" style="display:none;">
+          <h3 style="font-size:15px; font-weight:700; color:#1e293b; margin-bottom:12px;">
+            Paso 2: Panel de Control y Resumen de Procesamiento
+          </h3>
+
+          <div class="import-kpi-grid">
+            <div class="import-kpi-card">
+              <div class="import-kpi-label">Hojas Analizadas</div>
+              <div class="import-kpi-value" id="kpi-hojas">0</div>
+            </div>
+            <div class="import-kpi-card">
+              <div class="import-kpi-label">Filas Procesadas</div>
+              <div class="import-kpi-value" id="kpi-filas">0</div>
+            </div>
+            <div class="import-kpi-card">
+              <div class="import-kpi-label">Expedientes Detectados</div>
+              <div class="import-kpi-value" id="kpi-expedientes" style="color:var(--azzen-orange);">0</div>
+            </div>
+            <div class="import-kpi-card">
+              <div class="import-kpi-label">Personas Detectadas</div>
+              <div class="import-kpi-value" id="kpi-personas">0</div>
+            </div>
+            <div class="import-kpi-card">
+              <div class="import-kpi-label">Nuevas en Padrón</div>
+              <div class="import-kpi-value" id="kpi-nuevas" style="color:#16a34a;">0</div>
+            </div>
+            <div class="import-kpi-card">
+              <div class="import-kpi-label">Vínculos a Generar</div>
+              <div class="import-kpi-value" id="kpi-vinculos">0</div>
+            </div>
+            <div class="import-kpi-card">
+              <div class="import-kpi-label">Duplicados Omitidos</div>
+              <div class="import-kpi-value" id="kpi-duplicados" style="color:#ca8a04;">0</div>
+            </div>
+            <div class="import-kpi-card">
+              <div class="import-kpi-label">Incompletos / Revisión</div>
+              <div class="import-kpi-value" id="kpi-incompletos" style="color:#dc2626;">0</div>
+            </div>
+          </div>
+
+          <!-- Vista Previa de Relaciones -->
+          <div class="box" style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:20px; margin-bottom:20px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <h4 style="margin:0; font-size:14px; font-weight:700; color:#1e293b;">
+                Vista Previa de Asociaciones Identificadas (Muestra de Actuaciones y Agentes)
+              </h4>
+              <span class="tag is-info is-light" id="preview-badge-total">0 actuaciones</span>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="mc-table" style="width:100%; font-size:12px;">
+                <thead>
+                  <tr>
+                    <th style="width:130px;">Expediente / Sumario</th>
+                    <th style="width:140px;">Repartición</th>
+                    <th style="width:110px;">Estado</th>
+                    <th style="width:150px;">Instructor</th>
+                    <th>Agentes Involucrados Identificados</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-preview">
+                  <!-- Filas dinámicas -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paso 3: Confirmación -->
+            <div style="margin-top:24px; padding-top:16px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <p style="margin:0; font-size:13px; font-weight:600; color:#334155;">
+                  ¿Verificó las asociaciones detectadas? Al confirmar, los datos se persistirán atómicamente en PostgreSQL.
+                </p>
+                <p style="margin:2px 0 0 0; font-size:12px; color:#64748b;">
+                  Se preservarán todas las identidades existentes y no se duplicarán personas ni expedientes.
+                </p>
+              </div>
+              <button type="button" id="btn-confirmar" class="button is-azzen" style="font-weight:700; padding:8px 20px;" onclick="ejecutarConfirmacion()">
+                💾 Confirmar e Importar a Base de Datos
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultado-commit-card" class="box" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:20px;">
+          <h4 style="margin:0 0 8px 0; color:#166534; font-size:16px; font-weight:700;">
+            ✅ Importación Completada Exitosamente
+          </h4>
+          <p id="commit-msg-detalle" style="margin:0; color:#15803d; font-size:13px; font-weight:600;"></p>
+          <div style="margin-top:14px;">
+            <a href="/expedientes" class="button is-small is-dark">Ver Actuaciones en Expedientes</a>
+            <a href="/personas" class="button is-small is-outlined" style="margin-left:8px;">Ver Padrón de Personas</a>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      var selectedFile = null;
+      var lastAnalysisData = null;
+
+      function handleFileSelected(files) {
+        if (!files || files.length === 0) return;
+        selectedFile = files[0];
+        document.getElementById('dropzone-text').innerText = 'Archivo seleccionado: ' + selectedFile.name + ' (' + (selectedFile.size / 1024).toFixed(1) + ' KB)';
+        document.getElementById('btn-analizar').disabled = false;
+        document.getElementById('analisis-status').innerText = 'Listo para analizar.';
+        document.getElementById('panel-resultados').style.display = 'none';
+        document.getElementById('resultado-commit-card').style.display = 'none';
+      }
+
+      var dropzone = document.getElementById('dropzone');
+      dropzone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+      });
+      dropzone.addEventListener('dragleave', function() {
+        dropzone.classList.remove('dragover');
+      });
+      dropzone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        handleFileSelected(e.dataTransfer.files);
+      });
+
+      async function ejecutarAnalisis() {
+        if (!selectedFile) return;
+        var btn = document.getElementById('btn-analizar');
+        var status = document.getElementById('analisis-status');
+        btn.disabled = true;
+        status.innerText = 'Analizando estructura, hojas y columnas equivalentes...';
+
+        var formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+          var resp = await fetch('/api/importar/analizar', {
+            method: 'POST',
+            body: formData
+          });
+          if (!resp.ok) {
+            throw new Error('Error al procesar el archivo: ' + resp.statusText);
+          }
+          var data = await resp.json();
+          lastAnalysisData = data;
+          renderResultados(data);
+          status.innerText = 'Análisis finalizado con éxito.';
+        } catch (err) {
+          status.innerText = 'Error: ' + err.message;
+          alert('Error durante el análisis: ' + err.message);
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      function renderResultados(data) {
+        var r = data.resumen || {};
+        document.getElementById('kpi-hojas').innerText = r.hojas_analizadas || 0;
+        document.getElementById('kpi-filas').innerText = r.total_filas_procesadas || 0;
+        document.getElementById('kpi-expedientes').innerText = r.expedientes_identificados || 0;
+        document.getElementById('kpi-personas').innerText = r.personas_identificadas || 0;
+        document.getElementById('kpi-nuevas').innerText = r.nuevas_personas_detectadas || 0;
+        document.getElementById('kpi-vinculos').innerText = r.agentes_vinculados || 0;
+        document.getElementById('kpi-duplicados').innerText = r.registros_duplicados_omitidos || 0;
+        document.getElementById('kpi-incompletos').innerText = r.registros_incompletos_revisar || 0;
+
+        var tbody = document.getElementById('tbody-preview');
+        tbody.innerHTML = '';
+        var list = data.vista_previa || [];
+        document.getElementById('preview-badge-total').innerText = list.length + ' actuaciones previsualizadas';
+
+        list.forEach(function(exp) {
+          var tr = document.createElement('tr');
+          var agentesHtml = '';
+          if (!exp.agentes || exp.agentes.length === 0) {
+            agentesHtml = '<span class="muted">Sin agentes vinculados</span>';
+          } else {
+            agentesHtml = '<div style="display:flex; flex-direction:column; gap:4px;">';
+            exp.agentes.forEach(function(a) {
+              var badgeClass = a.es_nueva ? 'badge-tag-nuevo' : 'badge-tag-existente';
+              var badgeText = a.es_nueva ? 'Nueva Persona' : 'Padrón Central';
+              agentesHtml += '<div style="display:flex; align-items:center; gap:6px;">' +
+                '<span class="mc-badge" style="background:#fff3e0; border:1px solid #ffe0b2; color:var(--azzen-orange); font-family:monospace; font-weight:700; padding:1px 5px;">' + a.credencial + '</span>' +
+                '<strong style="color:#1e293b;">' + a.nombre + '</strong>' +
+                '<span class="' + badgeClass + '">' + badgeText + '</span>' +
+                '</div>';
+            });
+            agentesHtml += '</div>';
+          }
+
+          tr.innerHTML = '<td><strong style="color:var(--azzen-orange); font-family:monospace;">' + exp.numero_expediente + '</strong></td>' +
+            '<td>' + exp.reparticion + '</td>' +
+            '<td><span class="mc-badge">' + exp.estado + '</span></td>' +
+            '<td>' + exp.instructor + '</td>' +
+            '<td>' + agentesHtml + '</td>';
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('panel-resultados').style.display = 'block';
+      }
+
+      async function ejecutarConfirmacion() {
+        if (!selectedFile) return;
+        if (!confirm('¿Confirma la importación definitiva de los registros a la base de datos?')) return;
+
+        var btn = document.getElementById('btn-confirmar');
+        btn.disabled = true;
+        btn.innerText = 'Importando a la base de datos...';
+
+        var formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+          var resp = await fetch('/api/importar/confirmar', {
+            method: 'POST',
+            body: formData
+          });
+          if (!resp.ok) {
+            throw new Error('Error al importar: ' + resp.statusText);
+          }
+          var res = await resp.json();
+          document.getElementById('commit-msg-detalle').innerText = 
+            'Se crearon ' + res.expedientes_nuevos + ' actuaciones nuevas, ' +
+            res.personas_nuevas + ' personas en el padrón central y ' +
+            res.vinculos_creados + ' vinculaciones relacionales.';
+          document.getElementById('resultado-commit-card').style.display = 'block';
+          document.getElementById('panel-resultados').style.display = 'none';
+        } catch (err) {
+          alert('Error durante la confirmación: ' + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerText = '💾 Confirmar e Importar a Base de Datos';
+        }
+      }
+    </script>
+  </body>
+</html>
+

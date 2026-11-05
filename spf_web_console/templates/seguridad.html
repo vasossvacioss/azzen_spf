@@ -1,0 +1,2205 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Centro de Seguridad e Identidades · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/bulma.min.css" />
+    <link rel="stylesheet" href="/static/bulma-azzen.css" />
+    <link rel="stylesheet" href="/static/style.css?v=20261025_12" />
+    <style>
+      /* Estilos específicos para el Centro de Seguridad */
+      .sec-badge-critica { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; font-weight: 700; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+      .sec-badge-alta { background: #ffedd5; color: #9a3412; border: 1px solid #fb923c; font-weight: 700; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+      .sec-badge-media { background: #fef9c3; color: #854d0e; border: 1px solid #facc15; font-weight: 600; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+      .sec-badge-baja { background: #e0f2fe; color: #075985; border: 1px solid #38bdf8; font-weight: 600; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+      .sec-badge-activo { background: #dcfce7; color: #166534; border: 1px solid #86efac; font-weight: 600; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+      .sec-badge-suspendido { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-weight: 600; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+      .sec-badge-bloqueado { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-weight: 700; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+      .sec-badge-verificado { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-weight: 600; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+      .sec-badge-pendiente { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; font-weight: 600; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; }
+
+      .sec-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+      .sec-stat-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
+      .sec-stat-label { font-size: 0.82rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 6px; }
+      .sec-stat-val { font-size: 1.8rem; font-weight: 800; color: #1e293b; line-height: 1; }
+      .sec-stat-sub { font-size: 0.78rem; color: #94a3b8; margin-top: 6px; }
+
+      .sec-tab-nav { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; background: #fafafa; padding: 6px 6px 0 6px; border-radius: 6px 6px 0 0; }
+      .sec-tab-btn { background: none; border: none; padding: 10px 16px; font-size: 0.92rem; font-weight: 600; color: #475569; cursor: pointer; border-radius: 4px 4px 0 0; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s ease; }
+      .sec-tab-btn:hover { background: #f1f5f9; color: #0f172a; }
+      .sec-tab-btn.active { background: #ffffff; color: #E95420; border-bottom: 3px solid #E95420; margin-bottom: -2px; font-weight: 700; box-shadow: 0 -2px 4px rgba(0,0,0,0.03); }
+
+      .sec-panel { display: none; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0 0 6px 6px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+      .sec-panel.active { display: block; }
+
+      .sec-form-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px 20px; margin-bottom: 20px; }
+      .sec-form-section-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; }
+      .sec-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+
+      .sec-toggle-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: #334155; }
+      .sec-toggle-label input[type="checkbox"] { width: 18px; height: 18px; accent-color: #E95420; cursor: pointer; }
+
+      .rbac-matrix { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+      .rbac-matrix th, .rbac-matrix td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: center; }
+      .rbac-matrix th { background: #f1f5f9; color: #334155; font-weight: 700; }
+      .rbac-matrix th.text-left, .rbac-matrix td.text-left { text-align: left; }
+      .rbac-matrix tr:hover { background: #f8fafc; }
+      .btn-perm-toggle { border: 1px solid #cbd5e1; background: #ffffff; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.15s; }
+      .btn-perm-toggle.granted { background: #dcfce7; color: #15803d; border-color: #86efac; }
+      .btn-perm-toggle.denied { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
+      .sec-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+      .sec-table th { background: #f8fafc; color: #475569; font-weight: 700; text-align: left; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; }
+      .sec-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+      .sec-table tr:hover td { background: #f8fafc; }
+
+      /* Sistema de Modales y Overlays Centrados (Ubuntu Yaru) */
+      .modal, .modal-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(15, 23, 42, 0.75) !important;
+        backdrop-filter: blur(4px) !important;
+        display: none;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 999999 !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+      }
+      .modal.is-active,
+      .modal.active,
+      .modal-overlay.active,
+      .modal[style*="display: flex"],
+      .modal[style*="display:flex"],
+      .modal-overlay[style*="display: flex"],
+      .modal-overlay[style*="display:flex"] {
+        display: flex !important;
+      }
+      .modal-content, .modal-box {
+        background: #ffffff !important;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-top: 4px solid #E95420 !important;
+        width: 100% !important;
+        max-width: 540px;
+        max-height: 90vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45) !important;
+        overflow: hidden !important;
+        animation: secModalFadeIn 0.18s ease-out;
+        position: relative;
+      }
+      @keyframes secModalFadeIn {
+        from { opacity: 0; transform: scale(0.96) translateY(-10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      .modal-header {
+        padding: 16px 22px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        background: #f8fafc !important;
+      }
+      .modal-header h3 {
+        margin: 0 !important;
+        font-size: 1.12rem !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .modal-body {
+        padding: 20px 22px !important;
+        overflow-y: auto !important;
+        flex: 1 !important;
+      }
+      .modal-footer {
+        padding: 14px 22px !important;
+        border-top: 1px solid #e2e8f0 !important;
+        display: flex !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+        background: #f8fafc !important;
+      }
+      .close-btn, .modal-close-btn, .btn-close {
+        background: transparent !important;
+        border: none !important;
+        font-size: 22px !important;
+        color: #64748b !important;
+        cursor: pointer !important;
+        padding: 4px 8px !important;
+        border-radius: 4px !important;
+        line-height: 1 !important;
+        transition: all 0.15s ease !important;
+      }
+      .close-btn:hover, .modal-close-btn:hover, .btn-close:hover {
+        background: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+      .form-label {
+        display: block;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 5px;
+      }
+      .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        color: #0f172a;
+        background: #ffffff;
+        box-sizing: border-box;
+        transition: border-color 0.15s ease;
+      }
+      .form-control:focus {
+        outline: none;
+        border-color: #E95420;
+        box-shadow: 0 0 0 3px rgba(233, 84, 32, 0.15);
+      }
+    </style>
+  </head>
+  <body>
+        <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <div class="notif-wrapper" style="position:relative;">
+          <button id="notif-bell-btn" class="notif-bell-btn" type="button" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
+            🔔
+            <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+            <div class="notif-dropdown-header">
+              <span style="font-weight:700;">Notificaciones</span>
+              <a href="javascript:void(0)" onclick="marcarTodasLeidas()" style="font-size:12px; color:var(--azzen-orange);">Marcar leídas</a>
+            </div>
+            <div id="notif-items-list" class="notif-items-list">
+              <div class="notif-empty">Cargando...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="/notificaciones">Ver todas las notificaciones →</a>
+            </div>
+          </div>
+        </div>
+
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+            <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+          <a href="/notificaciones" class="nav-item">
+            <span>🔔</span> Notificaciones
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          {% for f in nav_files %}
+          <details>
+            <summary>📊 {{ f.file_name }}</summary>
+            <div class="subnav">
+              {% for s in f.sheets %}
+              <a href="/fuente/{{ f.file_id }}/hoja/{{ s.sheet_id }}">{{ s.sheet_name }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Búsqueda global
+          </a>
+          <a href="/personas" class="nav-item">
+            <span>👥</span> Personas
+          </a>
+          <a href="/staging" class="nav-item">
+            <span>⚠️</span> Staging sin credencial
+          </a>
+          <a href="/modulos" class="nav-item">
+            <span>📦</span> Catálogo de Módulos
+          </a>
+          <a href="/modulos/dashboard" class="nav-item">
+            <span>📊</span> Dashboard Estadístico
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Auditoría y Sistema</div>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🧹</span> Calidad de Datos
+          </a>
+          <a href="/administracion/versiones" class="nav-item">
+            <span>📜</span> Control de versiones
+          </a>
+          <a href="/seguridad" class="nav-item active">
+            <span>🛡️</span> Centro de Seguridad
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/seguridad">Administración del Sistema</a></li>
+            <li class="is-active"><a href="/seguridad">Centro de Seguridad, Identidades y Acceso</a></li>
+          </ul>
+        </div>
+
+        <!-- Encabezado Operativo -->
+        <div class="mc-header-bar" style="margin-bottom: 20px;">
+          <div>
+            <h1 style="display:flex; align-items:center; gap: 10px; margin:0;">
+              <span>🛡️</span> Centro de Seguridad, Identidades, Dispositivos y Control de Acceso
+            </h1>
+            <p style="margin: 6px 0 0 0; color: #64748b; font-size: 0.92rem;">
+              Gobierno central de identidades (IAM), políticas de autenticación, control RBAC, gestión de terminales autorizados y auditoría transversal según directrices ISO/IEC 27001:2022 y NIST.
+            </p>
+          </div>
+          <div style="display:flex; gap: 8px;">
+            <button type="button" class="btn btn-secondary" onclick="abrirModalCrearSolicitud()">
+              <span>📝</span> Nueva Solicitud
+            </button>
+            <button type="button" class="btn btn-primary" onclick="abrirModalCrearUsuario()">
+              <span>➕</span> Alta de Usuario
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjetas de Métricas Clave (KPIs de Seguridad) -->
+        <div class="sec-stats-grid">
+          <div class="sec-stat-card">
+            <span class="sec-stat-label">Cuentas Registradas</span>
+            <span class="sec-stat-val">{{ stats.total_usuarios }}</span>
+            <span class="sec-stat-sub">{{ stats.usuarios_activos }} activas en el sistema</span>
+          </div>
+          <div class="sec-stat-card">
+            <span class="sec-stat-label">Correos Verificados</span>
+            <span class="sec-stat-val" style="color: #166534;">{{ stats.usuarios_verificados }}</span>
+            <span class="sec-stat-sub">
+              {% if stats.usuarios_pendientes_email > 0 %}
+              <span style="color: #d97706; font-weight:700;">{{ stats.usuarios_pendientes_email }} pendientes</span>
+              {% else %}
+              100% verificado
+              {% endif %}
+            </span>
+          </div>
+          <div class="sec-stat-card">
+            <span class="sec-stat-label">Sesiones Activas</span>
+            <span class="sec-stat-val" style="color: #0369a1;">{{ stats.sesiones_activas }}</span>
+            <span class="sec-stat-sub">En tiempo real</span>
+          </div>
+          <div class="sec-stat-card">
+            <span class="sec-stat-label">Dispositivos Autorizados</span>
+            <span class="sec-stat-val">{{ stats.dispositivos_autorizados }}</span>
+            <span class="sec-stat-sub">{{ stats.dispositivos_pendientes }} pendientes de revisión</span>
+          </div>
+          <div class="sec-stat-card">
+            <span class="sec-stat-label">Solicitudes Pendientes</span>
+            <span class="sec-stat-val" style="{% if stats.solicitudes_pendientes > 0 %}color: #d97706;{% endif %}">{{ stats.solicitudes_pendientes }}</span>
+            <span class="sec-stat-sub">Separación de funciones</span>
+          </div>
+          <div class="sec-stat-card">
+            <span class="sec-stat-label">Alertas Activas</span>
+            <span class="sec-stat-val" style="{% if stats.alertas_activas > 0 %}color: #dc2626;{% else %}color: #166534;{% endif %}">{{ stats.alertas_activas }}</span>
+            <span class="sec-stat-sub">Eventos de riesgo</span>
+          </div>
+        </div>
+
+        <!-- Navegación por Pestañas del Centro de Seguridad -->
+        <div class="sec-tab-nav" id="sec-tab-nav">
+          <button type="button" class="sec-tab-btn {% if tab_activa == "usuarios" %}active{% endif %}" onclick="cambiarTabSeguridad('usuarios')">
+            <span>👥</span> Usuarios y Cuentas
+          </button>
+          <button type="button" class="sec-tab-btn {% if tab_activa == "politicas" %}active{% endif %}" onclick="cambiarTabSeguridad('politicas')">
+            <span>⚙️</span> Políticas de Seguridad
+          </button>
+          <button type="button" class="sec-tab-btn {% if tab_activa == "dispositivos" %}active{% endif %}" onclick="cambiarTabSeguridad('dispositivos')">
+            <span>💻</span> Dispositivos Autorizados
+          </button>
+          <button type="button" class="sec-tab-btn {% if tab_activa == "solicitudes" %}active{% endif %}" onclick="cambiarTabSeguridad('solicitudes')">
+            <span>📝</span> Solicitudes y Aprobaciones
+          </button>
+          <button type="button" class="sec-tab-btn {% if tab_activa == "sesiones" %}active{% endif %}" onclick="cambiarTabSeguridad('sesiones')">
+            <span>⏱️</span> Sesiones Activas
+          </button>
+          <button type="button" class="sec-tab-btn {% if tab_activa == "rbac" %}active{% endif %}" onclick="cambiarTabSeguridad('rbac')">
+            <span>🛡️</span> Matriz RBAC / Permisos
+          </button>
+          <button type="button" class="sec-tab-btn {% if tab_activa == "alertas" %}active{% endif %}" onclick="cambiarTabSeguridad('alertas')">
+            <span>🚨</span> Alertas y Auditoría
+          </button>
+          <button type="button" class="sec-tab-btn {% if tab_activa == "codigos" %}active{% endif %}" onclick="cambiarTabSeguridad('codigos')">
+            <span>✉️</span> Verificación de Correo
+          </button>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 1: USUARIOS Y CUENTAS -->
+        <!-- ========================================== -->
+        <div id="panel-usuarios" class="sec-panel {% if tab_activa == "usuarios" %}active{% endif %}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.15rem; margin:0; color:#1e293b;">Catálogo de Identidades y Cuentas de Acceso</h2>
+              <p style="margin:4px 0 0 0; color:#64748b; font-size:0.88rem;">Toda cuenta humana posee correo electrónico individual y trazabilidad de accesos.</p>
+            </div>
+            <div style="display:flex; gap: 8px;">
+              <input type="text" id="filtro-usuarios" placeholder="Filtrar por credencial o nombre..." onkeyup="filtrarTablaUsuarios()" class="form-control" style="width: 250px; padding: 6px 12px; font-size:0.88rem;" />
+              <button type="button" class="btn btn-primary" onclick="abrirModalCrearUsuario()">+ Nuevo Usuario</button>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="table is-fullwidth is-hoverable is-narrow is-striped sec-table" id="tabla-usuarios">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Credencial</th>
+                  <th>Nombre y Apellido</th>
+                  <th>Correo Electrónico</th>
+                  <th>Estado Email</th>
+                  <th>2FA (TOTP)</th>
+                  <th>Rol</th>
+                  <th>Estado Cuenta</th>
+                  <th>Último Acceso / IP</th>
+                  <th>Dispositivos</th>
+                  <th style="text-align:center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in users %}
+                <tr data-user-row="{{ u.credential }} {{ u.display_name }} {{ u.email }} {{ u.role }}">
+                  <td><strong>#{{ u.id }}</strong></td>
+                  <td><code style="font-weight:700; color:#0f172a;">{{ u.credential }}</code></td>
+                  <td><strong>{{ u.display_name }}</strong></td>
+                  <td>{{ u.email }}</td>
+                  <td>
+                    {% if u.email_verificado %}
+                    <span class="sec-badge-verificado">✓ Verificado</span>
+                    {% else %}
+                    <span class="sec-badge-pendiente">⏳ Pendiente</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if u.totp_habilitado %}
+                    <span class="sec-badge-activo" title="TOTP configurado y activo">✓ Activo</span>
+                    {% else %}
+                    <span class="sec-badge-pendiente" title="Sin vincular o no configurado">Inactivo</span>
+                    {% endif %}
+                    {% if u.must_change_password %}
+                    <div style="font-size:10px; color:#b91c1c; font-weight:700; margin-top:2px;">⚠️ Cambio clave</div>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span class="badge" style="background:#f1f5f9; color:#334155; font-weight:600;">{{ u.role }}</span>
+                  </td>
+                  <td>
+                    {% if u.estado == "activo" %}
+                    <span class="sec-badge-activo">Activo</span>
+                    {% else if u.estado == "suspendido" %}
+                    <span class="sec-badge-suspendido">Suspendido</span>
+                    {% else if u.estado == "bloqueado" %}
+                    <span class="sec-badge-bloqueado">Bloqueado</span>
+                    {% else %}
+                    <span class="badge">{{ u.estado }}</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size:0.82rem; color:#64748b;">
+                    {{ u.ultimo_acceso_fmt }}<br/><small>{{ u.ip_ultimo_acceso_fmt }}</small>
+                  </td>
+                  <td style="text-align:center;">
+                    <span class="badge" style="background:#e2e8f0; color:#475569;">{{ u.dispositivos_count }}</span>
+                  </td>
+                  <td style="text-align:center; white-space:nowrap;">
+                    {% if !u.email_verificado %}
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="reenviarCodigoUsuario({{ u.id }}, '{{ u.email }}')" title="Reenviar código de verificación de correo">
+                      ✉️ Código
+                    </button>
+                    {% endif %}
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="abrirModalEditarUsuario({{ u.id }}, '{{ u.credential }}', '{{ u.display_name }}', '{{ u.role }}', '{{ u.estado }}')" title="Modificar rol o estado">
+                      🔄 Editar
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="abrirModalResetPassword({{ u.id }}, '{{ u.credential }}')" title="Resetear contraseña">
+                      🔑 Clave
+                    </button>
+                    {% if u.totp_habilitado %}
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="abrirModalResetTotp({{ u.id }}, '{{ u.credential }}')" title="Restablecer 2FA (TOTP)">
+                      📱 Reset 2FA
+                    </button>
+                    {% endif %}
+                    {% if u.estado == "activo" %}
+                    <button type="button" class="btn btn-sm" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;" onclick="abrirModalSuspenderUsuario({{ u.id }}, '{{ u.credential }}', '{{ u.display_name }}', 'suspendido')" title="Suspender acceso">
+                      🚫 Suspender
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-sm" style="background:#dcfce7; color:#15803d; border:1px solid #86efac;" onclick="abrirModalSuspenderUsuario({{ u.id }}, '{{ u.credential }}', '{{ u.display_name }}', 'activo')" title="Habilitar acceso">
+                      ✅ Activar
+                    </button>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 2: POLÍTICAS DE SEGURIDAD -->
+        <!-- ========================================== -->
+        <div id="panel-politicas" class="sec-panel {% if tab_activa == "politicas" %}active{% endif %}">
+          <div style="margin-bottom: 20px;">
+            <h2 style="font-size: 1.15rem; margin:0; color:#1e293b;">Parámetros Centrales de Políticas de Seguridad</h2>
+            <p style="margin:4px 0 0 0; color:#64748b; font-size:0.88rem;">
+              Las directrices configuradas aquí son evaluadas de forma estricta por el backend de AZZEN SPF en cada intento de acceso y sesión.
+            </p>
+          </div>
+
+          <form id="form-politicas-seguridad" onsubmit="guardarPoliticasSeguridad(event)">
+            <!-- Sección 1: Sesiones -->
+            <div class="sec-form-section">
+              <div class="sec-form-section-title">
+                <span>⏱️</span> Control y Ciclo de Vida de Sesiones
+              </div>
+              <div class="sec-form-grid">
+                <div>
+                  <label class="form-label">Expiración por inactividad (minutos)</label>
+                  <input type="number" id="pol-session-idle" class="form-control" value="{{ politicas.session_idle_minutes }}" min="5" max="480" required />
+                  <small style="color:#64748b;">La sesión se invalidará automáticamente tras este período sin actividad.</small>
+                </div>
+                <div>
+                  <label class="form-label">Duración máxima absoluta (horas)</label>
+                  <input type="number" id="pol-session-abs" class="form-control" value="{{ politicas.session_absolute_hours }}" min="1" max="72" required />
+                  <small style="color:#64748b;">Tiempo máximo de vida tras el cual se exigirá reautenticación completa.</small>
+                </div>
+                <div style="display:flex; align-items:center; padding-top:20px;">
+                  <label class="sec-toggle-label">
+                    <input type="checkbox" id="pol-single-session" {% if politicas.single_session_per_user %}checked{% endif %} />
+                    <span>Restringir a sesión única simultánea por usuario (bloquea nuevos ingresos y alerta por correo)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección 2: Autenticación, MFA y Códigos Temporales -->
+            <div class="sec-form-section">
+              <div class="sec-form-section-title">
+                <span>✉️</span> Segundo Factor (MFA) y Códigos Temporales
+              </div>
+              <div class="sec-form-grid">
+                <div>
+                  <label class="form-label">Política de Segundo Factor (Código al correo)</label>
+                  <select id="pol-mfa-policy" class="form-control">
+                    <option value="deshabilitado" {% if politicas.mfa_policy == "deshabilitado" %}selected{% endif %}>Deshabilitado (solo contraseña)</option>
+                    <option value="opcional" {% if politicas.mfa_policy == "opcional" %}selected{% endif %}>Opcional (según configuración de usuario)</option>
+                    <option value="privilegiados" {% if politicas.mfa_policy == "privilegiados" %}selected{% endif %}>Obligatorio para roles con privilegios (Recomendado ISO 27001)</option>
+                    <option value="todos" {% if politicas.mfa_policy == "todos" %}selected{% endif %}>Obligatorio para todos los usuarios</option>
+                  </select>
+                  <small style="color:#64748b;">Aplica desafío con código único temporal de 6 dígitos enviado al correo verificado.</small>
+                </div>
+                <div>
+                  <label class="form-label">Vigencia de códigos temporales (minutos)</label>
+                  <input type="number" id="pol-code-expiry" class="form-control" value="{{ politicas.temp_code_expiry_minutes }}" min="1" max="30" required />
+                  <small style="color:#64748b;">Ventana de tiempo en la que el código SHA-256 es admisible.</small>
+                </div>
+                <div>
+                  <label class="form-label">Reenvíos máximos permitidos por desafío</label>
+                  <input type="number" id="pol-code-resends" class="form-control" value="{{ politicas.max_temp_code_resends }}" min="1" max="10" required />
+                  <small style="color:#64748b;">Protección contra bombardeo de correos y saturación.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección 3: Bloqueo y Fuerza Bruta -->
+            <div class="sec-form-section">
+              <div class="sec-form-section-title">
+                <span>🛡️</span> Protección contra Intentos Automatizados y Fuerza Bruta
+              </div>
+              <div class="sec-form-grid">
+                <div>
+                  <label class="form-label">Intentos fallidos máximos antes de bloqueo</label>
+                  <input type="number" id="pol-max-attempts" class="form-control" value="{{ politicas.max_login_attempts }}" min="3" max="20" required />
+                  <small style="color:#64748b;">Número de contraseñas erróneas antes de suspender temporalmente la cuenta.</small>
+                </div>
+                <div>
+                  <label class="form-label">Duración del bloqueo temporal (minutos)</label>
+                  <input type="number" id="pol-lockout-mins" class="form-control" value="{{ politicas.lockout_duration_minutes }}" min="5" max="1440" required />
+                  <small style="color:#64748b;">Tiempo de espera obligatorio antes de volver a permitir intentos.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección 4: Dispositivos y Contraseñas -->
+            <div class="sec-form-section">
+              <div class="sec-form-section-title">
+                <span>💻</span> Dispositivos y Complejidad de Credenciales
+              </div>
+              <div class="sec-form-grid">
+                <div style="display:flex; align-items:center;">
+                  <label class="sec-toggle-label">
+                    <input type="checkbox" id="pol-require-device" {% if politicas.require_device_approval %}checked{% endif %} />
+                    <span>Exigir aprobación explícita de nuevos dispositivos (quedan en 'Pendiente' hasta revisión)</span>
+                  </label>
+                </div>
+                <div>
+                  <label class="form-label">Longitud mínima de contraseña</label>
+                  <input type="number" id="pol-pass-min-len" class="form-control" value="{{ politicas.password_min_length }}" min="6" max="64" required />
+                </div>
+                <div style="display:flex; align-items:center;">
+                  <label class="sec-toggle-label">
+                    <input type="checkbox" id="pol-pass-special" {% if politicas.password_require_special %}checked{% endif %} />
+                    <span>Exigir al menos un carácter numérico o símbolo especial</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+              <span id="pol-save-status" style="align-self:center; font-size:0.9rem; font-weight:600;"></span>
+              <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-weight:700;">
+                <span>💾</span> Guardar Políticas de Seguridad
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 3: DISPOSITIVOS AUTORIZADOS -->
+        <!-- ========================================== -->
+        <div id="panel-dispositivos" class="sec-panel {% if tab_activa == "dispositivos" %}active{% endif %}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.15rem; margin:0; color:#1e293b;">Registro y Control de Terminales / Dispositivos</h2>
+              <p style="margin:4px 0 0 0; color:#64748b; font-size:0.88rem;">Monitoreo de equipos desde los cuales acceden las identidades autorizadas.</p>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="abrirModalRegistrarDispositivo()">
+              <span>➕</span> Registrar Dispositivo
+            </button>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="table is-fullwidth is-hoverable is-narrow is-striped sec-table">
+              <thead>
+                <tr>
+                  <th>UUID Dispositivo</th>
+                  <th>Usuario</th>
+                  <th>Nombre del Equipo</th>
+                  <th>Sistema / Navegador</th>
+                  <th>IP Registro</th>
+                  <th>Estado</th>
+                  <th>Última Actividad</th>
+                  <th style="text-align:center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if dispositivos.is_empty() %}
+                <tr>
+                  <td colspan="8" style="text-align:center; padding: 30px; color:#64748b;">
+                    No hay dispositivos registrados en este momento.
+                  </td>
+                </tr>
+                {% else %}
+                {% for d in dispositivos %}
+                <tr>
+                  <td><code style="font-size:0.8rem; background:#f1f5f9; padding:2px 6px; border-radius:4px;">{{ d.dispositivo_uuid }}</code></td>
+                  <td><strong>{{ d.usuario_nombre }}</strong> ({{ d.usuario_credential }})</td>
+                  <td>{{ d.nombre_dispositivo }}</td>
+                  <td>{{ d.sistema_operativo }} / {{ d.navegador }}</td>
+                  <td>{{ d.ip_registro }}</td>
+                  <td>
+                    {% if d.estado == "autorizado" || d.estado == "aprobado" %}
+                    <span class="sec-badge-activo">✓ Aprobado</span>
+                    {% else if d.estado == "pendiente" %}
+                    <span class="sec-badge-pendiente">⏳ Pendiente</span>
+                    {% else if d.estado == "rechazado" %}
+                    <span class="sec-badge-critica">Rechazado</span>
+                    {% else if d.estado == "suspendido" %}
+                    <span class="sec-badge-suspendido">Suspendido</span>
+                    {% else %}
+                    <span class="sec-badge-critica">Revocado</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size:0.82rem; color:#64748b;">{{ d.ultima_actividad }}</td>
+                  <td style="text-align:center; white-space:nowrap;">
+                    {% if d.estado == "pendiente" %}
+                      {% if d.user_id == current_user_id %}
+                      <span class="badge" style="background:#fef3c7; color:#92400e; font-size:11px;" title="Separación de funciones: otro administrador debe autorizar su terminal">
+                        ⚠️ Propio (Requiere otro admin)
+                      </span>
+                      {% else %}
+                      <button type="button" class="btn btn-sm btn-primary" onclick="cambiarEstadoDispositivo({{ d.id }}, 'aprobado')">
+                        ✓ Aprobar
+                      </button>
+                      <button type="button" class="btn btn-sm" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;" onclick="cambiarEstadoDispositivo({{ d.id }}, 'rechazado')">
+                        ✕ Rechazar
+                      </button>
+                      {% endif %}
+                    {% endif %}
+                    {% if d.estado == "autorizado" || d.estado == "aprobado" %}
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="cambiarEstadoDispositivo({{ d.id }}, 'suspendido')">
+                      ⏸️ Suspender
+                    </button>
+                    {% else if d.estado == "suspendido" || d.estado == "rechazado" %}
+                      {% if d.user_id != current_user_id || user_role == "superusuario" %}
+                      <button type="button" class="btn btn-sm btn-secondary" onclick="cambiarEstadoDispositivo({{ d.id }}, 'aprobado')">
+                        ▶️ Habilitar
+                      </button>
+                      {% endif %}
+                    {% else if d.estado == "revocado" %}
+                      {% if d.user_id != current_user_id || user_role == "superusuario" %}
+                      <button type="button" class="btn btn-sm" style="background:#0284c7; color:#ffffff; border:1px solid #0369a1; font-weight:600; display:inline-flex; align-items:center; gap:4px;" onclick="abrirModalHabilitarRevocado({{ d.id }}, '{{ d.usuario_nombre }}', '{{ d.dispositivo_uuid }}')">
+                        🔄 Habilitar con 2FA
+                      </button>
+                      {% endif %}
+                    {% endif %}
+                    {% if d.estado != "revocado" %}
+                    <button type="button" class="btn btn-sm" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;" onclick="cambiarEstadoDispositivo({{ d.id }}, 'revocado')">
+                      🚫 Revocar
+                    </button>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 4: SOLICITUDES Y APROBACIONES -->
+        <!-- ========================================== -->
+        <div id="panel-solicitudes" class="sec-panel {% if tab_activa == "solicitudes" %}active{% endif %}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.15rem; margin:0; color:#1e293b;">Flujo de Solicitudes y Aprobaciones Formales</h2>
+              <p style="margin:4px 0 0 0; color:#64748b; font-size:0.88rem;">
+                Control de separación de funciones (0 autoaprobaciones). Un solicitante no puede aprobar su propia petición.
+              </p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="abrirModalCrearSolicitud()">
+              <span>📝</span> Crear Solicitud Formal
+            </button>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="table is-fullwidth is-hoverable is-narrow is-striped sec-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tipo</th>
+                  <th>Solicitante</th>
+                  <th>Usuario Afectado</th>
+                  <th>Motivo Fundamentado</th>
+                  <th>Estado</th>
+                  <th>Aprobador / Decisión</th>
+                  <th>Fecha</th>
+                  <th style="text-align:center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if solicitudes.is_empty() %}
+                <tr>
+                  <td colspan="9" style="text-align:center; padding: 30px; color:#64748b;">
+                    No hay solicitudes pendientes ni registradas.
+                  </td>
+                </tr>
+                {% else %}
+                {% for s in solicitudes %}
+                <tr>
+                  <td><strong>#{{ s.id }}</strong></td>
+                  <td><span class="badge" style="background:#e0e7ff; color:#3730a3; font-weight:700;">{{ s.tipo }}</span></td>
+                  <td>{{ s.solicitante_nombre }}</td>
+                  <td>{{ s.usuario_afectado_nombre }}</td>
+                  <td style="max-width:280px; font-size:0.84rem;">{{ s.motivo_solicitud }}</td>
+                  <td>
+                    {% if s.estado == "pendiente" %}
+                    <span class="sec-badge-pendiente">⏳ Pendiente</span>
+                    {% else if s.estado == "aprobada" %}
+                    <span class="sec-badge-activo">✓ Aprobada</span>
+                    {% else %}
+                    <span class="sec-badge-critica">✕ Rechazada</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size:0.82rem;">
+                    <strong>{{ s.aprobador_nombre }}</strong><br/><small>{{ s.motivo_decision }}</small>
+                  </td>
+                  <td style="font-size:0.82rem; color:#64748b;">{{ s.fecha_solicitud }}</td>
+                  <td style="text-align:center; white-space:nowrap;">
+                    {% if s.estado == "pendiente" %}
+                      {% if s.solicitante_id == current_user_id %}
+                      <span style="font-size:0.75rem; color:#94a3b8; font-style:italic;">(Su propia solicitud - no puede autoaprobar)</span>
+                      {% else %}
+                      <button type="button" class="btn btn-sm btn-primary" onclick="resolverSolicitudModal({{ s.id }}, 'aprobar')">✓ Aprobar</button>
+                      <button type="button" class="btn btn-sm" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;" onclick="resolverSolicitudModal({{ s.id }}, 'rechazar')">✕ Rechazar</button>
+                      {% endif %}
+                    {% else %}
+                      <span style="font-size:0.75rem; color:#94a3b8;">Resuelta</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 5: SESIONES ACTIVAS -->
+        <!-- ========================================== -->
+        <div id="panel-sesiones" class="sec-panel {% if tab_activa == "sesiones" %}active{% endif %}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.15rem; margin:0; color:#1e293b;">Monitoreo en Tiempo Real de Sesiones Activas</h2>
+              <p style="margin:4px 0 0 0; color:#64748b; font-size:0.88rem;">
+                Revocación inmediata en 0 ms. Al revocar una sesión, la conexión es expulsada instantáneamente.
+              </p>
+            </div>
+            <button type="button" class="btn" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;" onclick="revocarTodasLasSesiones()">
+              ⚠️ Cerrar Todas las Otras Sesiones
+            </button>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="table is-fullwidth is-hoverable is-narrow is-striped sec-table">
+              <thead>
+                <tr>
+                  <th>ID Sesión</th>
+                  <th>Usuario</th>
+                  <th>Rol</th>
+                  <th>IP / Dispositivo</th>
+                  <th>Navegador / Cliente</th>
+                  <th>Inicio de Sesión</th>
+                  <th>Última Actividad</th>
+                  <th>Expiración Estimada</th>
+                  <th>Estado / Motivo</th>
+                  <th style="text-align:center;">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in sesiones %}
+                <tr {% if s.is_current %}style="background:#f0fdf4;"{% endif %}>
+                  <td>
+                    <code style="font-size:0.8rem;">{{ s.id }}</code>
+                    {% if s.is_current %}
+                    <br/><span class="sec-badge-activo" style="font-size:0.7rem;">Sesión Actual</span>
+                    {% endif %}
+                  </td>
+                  <td><strong>{{ s.display_name }}</strong> ({{ s.credential }})</td>
+                  <td><span class="badge" style="background:#f1f5f9; color:#334155;">{{ s.role }}</span></td>
+                  <td>
+                    <code>{{ s.ip_address }}</code>
+                    <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">{{ s.dispositivo_info }}</div>
+                  </td>
+                  <td style="font-size:0.82rem; max-width:200px; overflow:hidden; text-overflow:ellipsis;">{{ s.user_agent }}</td>
+                  <td style="font-size:0.82rem; color:#64748b;">{{ s.created_at }}</td>
+                  <td style="font-size:0.82rem; font-weight:600;">{{ s.last_activity }}</td>
+                  <td style="font-size:0.82rem; color:#64748b;">{{ s.expires_at }}</td>
+                  <td style="font-size:0.78rem;">{{ s.estado_fmt }}</td>
+                  <td style="text-align:center;">
+                    {% if !s.is_current %}
+                    <button type="button" class="btn btn-sm" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5;" onclick="revocarSesion('{{ s.id }}')">
+                      🚫 Expulsar
+                    </button>
+                    {% else %}
+                    <span style="font-size:0.75rem; color:#166534; font-weight:600;">En uso</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 6: MATRIZ DE ROLES Y PERMISOS (RBAC) -->
+        <!-- ========================================== -->
+        <div id="panel-rbac" class="sec-panel {% if tab_activa == "rbac" %}active{% endif %}">
+          <div style="margin-bottom: 16px;">
+            <h2 style="font-size: 1.15rem; margin:0; color:#1e293b;">Matriz Transversal de Control de Acceso (RBAC / ABAC)</h2>
+            <p style="margin:4px 0 0 0; color:#64748b; font-size:0.88rem;">
+              Separación de funciones estricta: los privilegios técnicos de seguridad están aislados del acceso a datos funcionales de expedientes.
+            </p>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="table is-fullwidth is-hoverable is-narrow is-striped rbac-matrix">
+              <thead>
+                <tr>
+                  <th class="text-left" style="width:200px;">Recurso / Módulo</th>
+                  <th class="text-left" style="width:160px;">Acción Específica</th>
+                  <th style="background:rgba(233,84,32,0.08); color:#c2410c;">superusuario</th>
+                  <th>admin_tecnico</th>
+                  <th>admin_expedientes</th>
+                  <th>auditor_seguridad</th>
+                  <th>operador</th>
+                  <th>consulta</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in rbac_matrix %}
+                <tr>
+                  <td class="text-left" style="font-weight:600; text-transform:capitalize;">{{ row.recurso }}</td>
+                  <td class="text-left"><code style="color:#0f172a;">{{ row.accion }}</code></td>
+                  <td style="background:rgba(233,84,32,0.03);">
+                    <button type="button" class="btn-perm-toggle {% if row.superusuario %}granted{% else %}denied{% endif %}" onclick="togglePermiso('superusuario', '{{ row.recurso }}', '{{ row.accion }}', {% if row.superusuario %}false{% else %}true{% endif %})">
+                      {% if row.superusuario %}✓ Permitido{% else %}✕ Denegado{% endif %}
+                    </button>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-perm-toggle {% if row.admin_tecnico %}granted{% else %}denied{% endif %}" onclick="togglePermiso('admin_tecnico', '{{ row.recurso }}', '{{ row.accion }}', {% if row.admin_tecnico %}false{% else %}true{% endif %})">
+                      {% if row.admin_tecnico %}✓ Permitido{% else %}✕ Denegado{% endif %}
+                    </button>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-perm-toggle {% if row.admin_expedientes %}granted{% else %}denied{% endif %}" onclick="togglePermiso('admin_expedientes', '{{ row.recurso }}', '{{ row.accion }}', {% if row.admin_expedientes %}false{% else %}true{% endif %})">
+                      {% if row.admin_expedientes %}✓ Permitido{% else %}✕ Denegado{% endif %}
+                    </button>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-perm-toggle {% if row.auditor_seguridad %}granted{% else %}denied{% endif %}" onclick="togglePermiso('auditor_seguridad', '{{ row.recurso }}', '{{ row.accion }}', {% if row.auditor_seguridad %}false{% else %}true{% endif %})">
+                      {% if row.auditor_seguridad %}✓ Permitido{% else %}✕ Denegado{% endif %}
+                    </button>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-perm-toggle {% if row.operador %}granted{% else %}denied{% endif %}" onclick="togglePermiso('operador', '{{ row.recurso }}', '{{ row.accion }}', {% if row.operador %}false{% else %}true{% endif %})">
+                      {% if row.operador %}✓ Permitido{% else %}✕ Denegado{% endif %}
+                    </button>
+                  </td>
+                  <td>
+                    <button type="button" class="btn-perm-toggle {% if row.consulta %}granted{% else %}denied{% endif %}" onclick="togglePermiso('consulta', '{{ row.recurso }}', '{{ row.accion }}', {% if row.consulta %}false{% else %}true{% endif %})">
+                      {% if row.consulta %}✓ Permitido{% else %}✕ Denegado{% endif %}
+                    </button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 7: ALERTAS Y AUDITORÍA -->
+        <!-- ========================================== -->
+        <div id="panel-alertas" class="sec-panel {% if tab_activa == "alertas" %}active{% endif %}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 1.15rem; margin:0; color:#1e293b;">Alertas Activas y Registro Cronológico de Eventos de Seguridad</h2>
+              <p style="margin:4px 0 0 0; color:#64748b; font-size:0.88rem;">Monitoreo preventivo y libro de auditoría transversal.</p>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="generarAlertaPrueba()">
+              <span>🔔</span> Simular Alerta de Prueba
+            </button>
+          </div>
+
+          <!-- Subsección Alertas -->
+          <h3 style="font-size: 1rem; color:#1e293b; margin: 16px 0 8px 0;">Alertas de Seguridad Detectadas</h3>
+          <div style="overflow-x:auto; margin-bottom: 24px;">
+            <table class="table is-fullwidth is-hoverable is-narrow is-striped sec-table">
+              <thead>
+                <tr>
+                  <th>Severidad</th>
+                  <th>Título de la Alerta</th>
+                  <th>Descripción del Evento</th>
+                  <th>Tipo</th>
+                  <th>Usuario</th>
+                  <th>Estado</th>
+                  <th>Fecha Detección</th>
+                  <th style="text-align:center;">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if alertas.is_empty() %}
+                <tr>
+                  <td colspan="8" style="text-align:center; padding: 20px; color:#64748b;">
+                    No se registran alertas activas. Sistema en estado seguro.
+                  </td>
+                </tr>
+                {% else %}
+                {% for alt in alertas %}
+                <tr>
+                  <td>
+                    {% if alt.severidad == "critica" %}
+                    <span class="sec-badge-critica">CRÍTICA</span>
+                    {% else if alt.severidad == "alta" %}
+                    <span class="sec-badge-alta">ALTA</span>
+                    {% else if alt.severidad == "media" %}
+                    <span class="sec-badge-media">MEDIA</span>
+                    {% else %}
+                    <span class="sec-badge-baja">BAJA</span>
+                    {% endif %}
+                  </td>
+                  <td><strong>{{ alt.titulo }}</strong></td>
+                  <td style="max-width:320px; font-size:0.84rem;">{{ alt.descripcion }}</td>
+                  <td><code>{{ alt.tipo_evento }}</code></td>
+                  <td>{{ alt.usuario_involucrado }}</td>
+                  <td>
+                    {% if alt.estado == "activa" %}
+                    <span class="sec-badge-bloqueado">Activa</span>
+                    {% else %}
+                    <span class="sec-badge-activo">Resuelta</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size:0.82rem; color:#64748b;">{{ alt.creada_at }}</td>
+                  <td style="text-align:center;">
+                    {% if alt.estado == "activa" %}
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="resolverAlertaModal({{ alt.id }})">
+                      ✓ Resolver
+                    </button>
+                    {% else %}
+                    <small style="color:#64748b;">{{ alt.motivo_resolucion }}</small>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Subsección Auditoría de Seguridad -->
+          <h3 style="font-size: 1rem; color:#1e293b; margin: 20px 0 8px 0;">Registro de Auditoría de Acciones y Eventos de Seguridad (Últimos 100)</h3>
+          <div style="overflow-x:auto;">
+            <table class="table is-fullwidth is-hoverable is-narrow is-striped sec-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Fecha y Hora</th>
+                  <th>Actor / Credencial</th>
+                  <th>Acción</th>
+                  <th>Recurso</th>
+                  <th>Resultado</th>
+                  <th>Detalles</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ev in eventos_recientes %}
+                <tr>
+                  <td><small>#{{ ev.id }}</small></td>
+                  <td style="font-size:0.82rem; color:#64748b;">{{ ev.occurred_at }}</td>
+                  <td><code>{{ ev.user_credential }}</code></td>
+                  <td><strong>{{ ev.action }}</strong></td>
+                  <td>{{ ev.resource }}</td>
+                  <td>
+                    {% if ev.result == "success" %}
+                    <span class="sec-badge-activo">SUCCESS</span>
+                    {% else if ev.result == "failed" %}
+                    <span class="sec-badge-bloqueado">FAILED</span>
+                    {% else %}
+                    <span class="badge">{{ ev.result }}</span>
+                    {% endif %}
+                  </td>
+                  <td><code style="font-size:0.75rem; max-width:300px; display:inline-block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ ev.details_str }}</code></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- PESTAÑA 8: VERIFICACIÓN DE CORREO -->
+        <!-- ========================================== -->
+        <div id="panel-codigos" class="sec-panel {% if tab_activa == "codigos" %}active{% endif %}">
+          <div style="margin-bottom: 20px;">
+            <h2 style="font-size: 1.15rem; margin:0; color:#1e293b;">Verificación de Correo Electrónico y Desafíos Temporales</h2>
+            <p style="margin:4px 0 0 0; color:#64748b; font-size:0.88rem;">
+              Conforme a la ampliación de la especificación: cada cuenta humana debe disponer de un correo verificado. Los códigos se almacenan exclusivamente como hash SHA-256 con vencimiento a 5 minutos.
+            </p>
+          </div>
+
+          <!-- Sección de Estado y Prueba del Servidor SMTP Real -->
+          <div class="sec-form-section" style="margin-bottom: 24px;">
+            <div class="sec-form-section-title">
+              <span>🚀</span> Servidor de Correo SMTP Saliente (Automático)
+            </div>
+            <div style="max-width: 680px;">
+              <p style="font-size:0.88rem; color:#475569; margin-bottom: 14px;">
+                Servicio configurado para despacho de <strong>códigos 2FA de inicio de sesión</strong>, <strong>altas de usuario</strong> y <strong>enlaces de verificación directa</strong>.
+              </p>
+
+              <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom: 16px;">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size:0.85rem;">
+                  <div>
+                    <span style="color:#64748b; display:block;">Servidor SMTP:</span>
+                    <strong style="color:#0f172a;">smtp.gmail.com : 587 (TLS)</strong>
+                  </div>
+                  <div>
+                    <span style="color:#64748b; display:block;">Casilla Emisora:</span>
+                    <strong style="color:#0f172a;">sisl16.ede@gmail.com</strong>
+                  </div>
+                  <div>
+                    <span style="color:#64748b; display:block;">Estado del Gateway:</span>
+                    <span style="color:#16a34a; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
+                      <span style="width:8px; height:8px; background:#16a34a; border-radius:50%; display:inline-block;"></span> Operativo y Listo
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="form-label">Enviar Correo de Prueba a:</label>
+                <div style="display:flex; gap: 10px; max-width: 500px;">
+                  <input type="email" id="smtp-test-email" class="form-control" value="sisl16.ede@gmail.com" placeholder="correo@dominio.com" />
+                  <button type="button" class="btn btn-primary" id="btn-probar-smtp" onclick="probarConexionSmtp()" style="white-space: nowrap;">
+                    ✉️ Enviar Prueba
+                  </button>
+                </div>
+                <div id="smtp-test-status" style="margin-top: 8px; font-size: 0.88rem; font-weight: 600;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-form-section">
+            <div class="sec-form-section-title">
+              <span>✉️</span> Herramienta de Validación de Código Temporal
+            </div>
+            <div style="max-width: 600px;">
+              <p style="font-size:0.88rem; color:#475569;">
+                Seleccione un usuario y proceda a validar un código de verificación de 6 dígitos ingresado por el agente:
+              </p>
+              <div style="display:flex; flex-direction:column; gap: 14px;">
+                <div>
+                  <label class="form-label">Usuario / Identidad</label>
+                  <select id="sim-user-select" class="form-control">
+                    {% for u in users %}
+                    <option value="{{ u.id }}">#{{ u.id }} - {{ u.credential }} ({{ u.display_name }}) - {{ u.email }} [{% if u.email_verificado %}Verificado{% else %}Pendiente{% endif %}]</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div style="display:flex; gap: 10px;">
+                  <button type="button" class="btn btn-secondary" onclick="simularGenerarCodigo()">
+                    <span>✉️</span> Generar / Enviar Nuevo Código
+                  </button>
+                </div>
+                <div id="sim-box-codigo" style="display:none; background:#f0fdf4; border:1px solid #86efac; border-radius:6px; padding:14px;">
+                  <strong style="color:#166534;">Código de verificación generado (Simulación de envío al correo):</strong>
+                  <div style="font-size: 1.8rem; font-weight:800; letter-spacing:4px; color:#1e293b; margin: 8px 0;" id="sim-display-codigo">
+                    ------
+                  </div>
+                  <small style="color:#475569;">El código tiene una validez de 5 minutos. El hash SHA-256 fue persistido en <code>app_codigos_temporales</code>.</small>
+                </div>
+                <div>
+                  <label class="form-label">Introducir Código de 6 Dígitos a Validar</label>
+                  <div style="display:flex; gap: 10px;">
+                    <input type="text" id="sim-input-codigo" class="form-control" placeholder="Ej: 123456" maxlength="6" style="width:160px; font-size:1.2rem; letter-spacing:3px; text-align:center;" />
+                    <button type="button" class="btn btn-primary" onclick="simularValidarCodigo()">
+                      ✓ Validar Código y Verificar Correo
+                    </button>
+                  </div>
+                  <div id="sim-res-status" style="margin-top:8px; font-weight:600; font-size:0.9rem;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- ==================================================== -->
+    <!-- MODALES DE ACCIÓN -->
+    <!-- ==================================================== -->
+
+    <!-- Modal 1: Alta de Usuario -->
+    <div id="modal-crear-usuario" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-crear-usuario')">
+      <div class="modal-content modal-box" style="max-width: 520px;">
+        <div class="modal-header">
+          <h3><span>➕</span> Alta de Nueva Identidad / Usuario</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-crear-usuario')">✕</button>
+        </div>
+        <form id="form-crear-usuario" onsubmit="crearUsuarioSubmit(event)">
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <div>
+              <label class="form-label">Credencial / Identificador Único *</label>
+              <input type="text" id="nu-credential" class="form-control" placeholder="Ej: 12345" required />
+            </div>
+            <div>
+              <label class="form-label">Nombre y Apellido *</label>
+              <input type="text" id="nu-name" class="form-control" placeholder="Ej: Gómez María" required />
+            </div>
+            <div>
+              <label class="form-label">Correo Electrónico Individual Obligatorio *</label>
+              <input type="email" id="nu-email" class="form-control" placeholder="Ej: mgomez@spf.gob.ar" required />
+              <small style="color:#64748b;">Debe ser individual y corporativo conforme política IAM.</small>
+            </div>
+            <div>
+              <label class="form-label">Rol Inicial Asignado *</label>
+              <select id="nu-role" class="form-control" required>
+                <option value="consulta">Usuario de Consulta</option>
+                <option value="operador">Usuario Operativo</option>
+                <option value="admin_expedientes">Administrador de Expedientes</option>
+                <option value="auditor_seguridad">Auditor de Seguridad</option>
+                <option value="admin_tecnico">Administrador Técnico de Seguridad</option>
+                <option value="superusuario">Superusuario (Acceso Total y TOTP Obligatorio)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Contraseña Inicial *</label>
+              <input type="password" id="nu-pass" class="form-control" placeholder="Mínimo 8 caracteres" required minlength="8" />
+            </div>
+            <div style="margin-top: 6px;">
+              <label class="sec-toggle-label">
+                <input type="checkbox" id="nu-enviar-codigo" checked />
+                <span>Generar código de verificación de correo inmediatamente</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-crear-usuario')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 2: Editar Rol / Estado -->
+    <div id="modal-editar-usuario" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-editar-usuario')">
+      <div class="modal-content modal-box" style="max-width: 480px;">
+        <div class="modal-header">
+          <h3><span>🔄</span> Modificar Rol / Estado de Cuenta</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-editar-usuario')">✕</button>
+        </div>
+        <form onsubmit="guardarEdicionUsuarioSubmit(event)">
+          <input type="hidden" id="eu-id" />
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <div>
+              <label class="form-label">Usuario</label>
+              <input type="text" id="eu-display" class="form-control" readonly style="background:#f1f5f9;" />
+            </div>
+            <div>
+              <label class="form-label">Rol Asignado</label>
+              <select id="eu-role" class="form-control" required>
+                <option value="consulta">Usuario de Consulta</option>
+                <option value="operador">Usuario Operativo</option>
+                <option value="admin_expedientes">Administrador de Expedientes</option>
+                <option value="auditor_seguridad">Auditor de Seguridad</option>
+                <option value="admin_tecnico">Administrador Técnico de Seguridad</option>
+                <option value="superusuario">Superusuario (Acceso Total y TOTP Obligatorio)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Estado de la Cuenta</label>
+              <select id="eu-estado" class="form-control" required>
+                <option value="activo">Activo (acceso permitido)</option>
+                <option value="suspendido">Suspendido (sesiones revocadas)</option>
+                <option value="bloqueado">Bloqueado (acceso impedido)</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Motivo Administrativo del Cambio *</label>
+              <input type="text" id="eu-motivo" class="form-control" placeholder="Ej: Cambio de área funcional asignada" required />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-editar-usuario')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 3: Resetear Contraseña (Credencial Temporal de 24 Horas) -->
+    <div id="modal-reset-password" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-reset-password')">
+      <div class="modal-content modal-box" style="max-width: 480px;">
+        <div class="modal-header">
+          <h3><span>🔑</span> Restablecer Contraseña</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-reset-password')">✕</button>
+        </div>
+        <form id="form-reset-password" onsubmit="resetPasswordSubmit(event)">
+          <input type="hidden" id="rp-id" />
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <p style="font-size:0.86rem; color:#475569; margin:0; line-height: 1.5;">
+              Se generará una credencial temporal de un solo uso con vigencia de <strong>24 horas</strong> para <strong id="rp-credential"></strong>. En su primer inicio de sesión se le exigirá de forma obligatoria el cambio de contraseña. Todas las sesiones activas serán invalidadas inmediatamente.
+            </p>
+            <div id="rp-inputs-container">
+              <div style="margin-bottom: 10px;">
+                <label class="form-label">Contraseña personalizada (opcional, dejar en blanco para autogenerar)</label>
+                <input type="password" id="rp-new-pass" class="form-control" placeholder="Autogenerada de alta entropía si se deja vacío" minlength="8" />
+              </div>
+              <div>
+                <label class="form-label">Motivo Formal de Restablecimiento *</label>
+                <input type="text" id="rp-motivo" class="form-control" placeholder="Ej: Olvido de clave solicitado formalmente por el titular" required />
+              </div>
+            </div>
+
+            <!-- Caja de Resultado con Contraseña Temporal Generada -->
+            <div id="rp-result-box" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:14px; text-align:center;">
+              <div style="font-size:12px; color:#166534; font-weight:700; text-transform:uppercase; margin-bottom:4px;">
+                ✓ Credencial Temporal Generada (Validez 24 horas)
+              </div>
+              <div style="font-family:'Ubuntu Mono', monospace; font-size:18px; font-weight:700; color:#0f172a; background:#ffffff; border:1px dashed #86efac; border-radius:4px; padding:8px 12px; margin:8px 0; letter-spacing:1px;" id="rp-generated-pass">
+                --------
+              </div>
+              <p style="font-size:11.5px; color:#475569; margin:4px 0 8px 0;">
+                Copie y transmita esta clave temporal al titular de forma segura. El sistema le forzará a cambiarla al ingresar.
+              </p>
+              <button type="button" class="btn btn-sm btn-secondary" onclick="copiarClaveTemporalGenerada()" style="margin:0 auto;">
+                📋 Copiar Credencial
+              </button>
+            </div>
+          </div>
+          <div class="modal-footer" id="rp-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-reset-password')">Cerrar</button>
+            <button type="submit" class="btn btn-primary" id="rp-submit-btn">Generar y Restablecer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal: Resetear Factor TOTP -->
+    <div id="modal-reset-totp" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-reset-totp')">
+      <div class="modal-content modal-box" style="max-width: 460px;">
+        <div class="modal-header">
+          <h3><span>📱</span> Restablecer Segundo Factor (TOTP)</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-reset-totp')">✕</button>
+        </div>
+        <form onsubmit="resetTotpSubmit(event)">
+          <input type="hidden" id="rt-id" />
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:6px; padding:10px 12px; font-size:0.84rem; color:#92400e; line-height:1.4;">
+              <strong>Advertencia de Seguridad:</strong> Se revocará la vinculación TOTP del usuario <strong id="rt-credential"></strong> e invalidarán todos sus códigos de respaldo. En su próximo acceso deberá volver a vincular la aplicación Google Authenticator.
+            </div>
+            <div>
+              <label class="form-label">Motivo Justificado del Restablecimiento *</label>
+              <textarea id="rt-motivo" class="form-control" rows="3" placeholder="Ej: Pérdida o cambio de dispositivo móvil informado formalmente..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-reset-totp')">Cancelar</button>
+            <button type="submit" class="btn btn-primary" style="background:#dc2626; border-color:#b91c1c;">Confirmar Restablecimiento</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    
+    <!-- Modal: Habilitar Dispositivo Revocado con 2FA (Google Authenticator) -->
+    <div id="modal-habilitar-dispositivo-2fa" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-habilitar-dispositivo-2fa')">
+      <div class="modal-content modal-box" style="max-width: 480px;">
+        <div class="modal-header">
+          <h3 style="display:flex; align-items:center; gap:8px;"><span>🛡️</span> Habilitar Dispositivo Revocado</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-habilitar-dispositivo-2fa')">✕</button>
+        </div>
+        <form onsubmit="habilitarDispositivoRevocadoSubmit(event)">
+          <input type="hidden" id="hr-disp-id" value="" />
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 14px;">
+            <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; padding:12px; font-size:0.88rem; color:#0369a1;">
+              <div><strong>Terminal a rehabilitar:</strong></div>
+              <div id="hr-info-disp" style="font-family:monospace; margin-top:4px; word-break:break-all; font-weight:700;"></div>
+              <div style="margin-top:6px;">Usuario asignado: <strong id="hr-info-user"></strong></div>
+            </div>
+            <div>
+              <label class="form-label" style="font-weight:700;">Código de Google Authenticator / 2FA (6 dígitos) *</label>
+              <input type="text" id="hr-totp-code" class="form-control" maxlength="6" pattern="[0-9]{6}" placeholder="Ej: 123456" style="letter-spacing: 5px; font-size: 1.3rem; text-align:center; font-weight:700;" required autofocus autocomplete="one-time-code" />
+              <small style="color:#64748b; font-size:0.8rem;">Ingrese el código temporal generado en su aplicación móvil para autorizar la reactivación.</small>
+            </div>
+            <div>
+              <label class="form-label">Motivo institucional</label>
+              <input type="text" id="hr-motivo" class="form-control" value="Rehabilitación autorizada de terminal revocado" required />
+            </div>
+            <div id="hr-error" style="display:none; color:#dc2626; font-size:0.85rem; font-weight:600; padding:8px 12px; background:#fef2f2; border:1px solid #fecaca; border-radius:4px;"></div>
+          </div>
+          <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:8px;">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-habilitar-dispositivo-2fa')">Cancelar</button>
+            <button type="submit" id="hr-btn-submit" class="btn btn-primary" style="background:#0284c7; border-color:#0369a1; font-weight:700;">✓ Confirmar y Habilitar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 4: Registrar Dispositivo -->
+    <div id="modal-registrar-dispositivo" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-registrar-dispositivo')">
+      <div class="modal-content modal-box" style="max-width: 480px;">
+        <div class="modal-header">
+          <h3><span>💻</span> Registrar Nuevo Terminal / Dispositivo</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-registrar-dispositivo')">✕</button>
+        </div>
+        <form onsubmit="registrarDispositivoSubmit(event)">
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <div>
+              <label class="form-label">Usuario Asignado</label>
+              <select id="rd-user-id" class="form-control" required>
+                {% for u in users %}
+                <option value="{{ u.id }}">#{{ u.id }} - {{ u.credential }} ({{ u.display_name }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Nombre del Dispositivo / Puesto *</label>
+              <input type="text" id="rd-nombre" class="form-control" placeholder="Ej: Estación Jurídicos 04" required />
+            </div>
+            <div>
+              <label class="form-label">Sistema Operativo *</label>
+              <input type="text" id="rd-so" class="form-control" placeholder="Ej: Windows 11 / Linux Ubuntu" required />
+            </div>
+            <div>
+              <label class="form-label">Navegador Web *</label>
+              <input type="text" id="rd-nav" class="form-control" placeholder="Ej: Google Chrome / Edge" required />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-registrar-dispositivo')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Registrar y Autorizar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 5: Crear Solicitud Formal -->
+    <div id="modal-crear-solicitud" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-crear-solicitud')">
+      <div class="modal-content modal-box" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3><span>📝</span> Crear Solicitud de Acceso / Privilegios</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-crear-solicitud')">✕</button>
+        </div>
+        <form onsubmit="crearSolicitudSubmit(event)">
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <div>
+              <label class="form-label">Tipo de Solicitud</label>
+              <select id="cs-tipo" class="form-control" required>
+                <option value="alta_usuario">Alta de Nueva Cuenta</option>
+                <option value="cambio_rol">Elevación / Cambio de Rol</option>
+                <option value="dispositivo">Autorización de Dispositivo</option>
+                <option value="privilegio_elevado">Privilegio Administrativo Temporal</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Usuario Afectado</label>
+              <select id="cs-usuario" class="form-control">
+                <option value="">— Ninguno / Solicitud General —</option>
+                {% for u in users %}
+                <option value="{{ u.id }}">#{{ u.id }} - {{ u.credential }} ({{ u.display_name }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Motivo Fundamentado de la Solicitud *</label>
+              <textarea id="cs-motivo" class="form-control" rows="3" placeholder="Explique la necesidad operativa o institucional de la solicitud..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-crear-solicitud')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Enviar a Revisión</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 6: Resolver Solicitud (Aprobar o Rechazar) -->
+    <div id="modal-resolver-solicitud" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-resolver-solicitud')">
+      <div class="modal-content modal-box" style="max-width: 460px;">
+        <div class="modal-header">
+          <h3 id="rs-titulo"><span>⚖️</span> Decisión sobre Solicitud</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-resolver-solicitud')">✕</button>
+        </div>
+        <form onsubmit="resolverSolicitudSubmit(event)">
+          <input type="hidden" id="rs-id" />
+          <input type="hidden" id="rs-decision" />
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <p id="rs-desc" style="font-size:0.88rem; color:#334155; margin:0; line-height: 1.5;"></p>
+            <div>
+              <label class="form-label">Fundamento / Motivo de la Decisión *</label>
+              <textarea id="rs-motivo" class="form-control" rows="3" placeholder="Fundamento obligatorio para el libro de auditoría..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-resolver-solicitud')">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="rs-btn-confirmar">Confirmar Decisión</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 7: Resolver Alerta -->
+    <div id="modal-resolver-alerta" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-resolver-alerta')">
+      <div class="modal-content modal-box" style="max-width: 450px;">
+        <div class="modal-header">
+          <h3><span>🚨</span> Resolver Alerta de Seguridad</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-resolver-alerta')">✕</button>
+        </div>
+        <form onsubmit="resolverAlertaSubmit(event)">
+          <input type="hidden" id="ra-id" />
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <p style="font-size:0.88rem; color:#475569; margin:0; line-height: 1.5;">
+              Indique las acciones de contención o mitigación ejecutadas para cerrar esta alerta:
+            </p>
+            <div>
+              <label class="form-label">Motivo de Resolución *</label>
+              <textarea id="ra-motivo" class="form-control" rows="3" placeholder="Ej: Se validó con el titular que el acceso fue legítimo..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-resolver-alerta')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Marcar Resuelta</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 8: Confirmar Suspensión / Cambio de Estado Rápido -->
+    <div id="modal-confirmar-suspension" class="modal modal-overlay" style="display:none;" onclick="if(event.target===this) cerrarModal('modal-confirmar-suspension')">
+      <div class="modal-content modal-box" style="max-width: 480px;">
+        <div class="modal-header">
+          <h3 id="ceu-titulo"><span>🚫</span> Suspender Acceso a Cuenta</h3>
+          <button type="button" class="btn-close close-btn" onclick="cerrarModal('modal-confirmar-suspension')">✕</button>
+        </div>
+        <form onsubmit="confirmarCambioEstadoUsuarioSubmit(event)">
+          <input type="hidden" id="ceu-id" />
+          <input type="hidden" id="ceu-estado" />
+          <div class="modal-body" style="display:flex; flex-direction:column; gap: 12px;">
+            <div id="ceu-mensaje" style="font-size:0.92rem; color:#1e293b; line-height: 1.5; background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:6px;"></div>
+            <div>
+              <label class="form-label">Motivo o Fundamento Administrativo *</label>
+              <textarea id="ceu-motivo" class="form-control" rows="3" placeholder="Indique la justificación formal obligatoria para el registro de auditoría..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="cerrarModal('modal-confirmar-suspension')">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="ceu-btn-confirmar">Confirmar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/static/azzen.js?v=20261025_12"></script>
+    <script>
+      function abrirModal(modalId) {
+        console.log('[AZZEN Seg] Abriendo modal:', modalId);
+        const m = document.getElementById(modalId);
+        if (m) {
+          m.style.display = 'flex';
+          m.classList.add('active');
+        } else {
+          console.error('[AZZEN Seg] No se encontró modal:', modalId);
+        }
+      }
+
+      function cerrarModal(modalId) {
+        console.log('[AZZEN Seg] Cerrando modal:', modalId);
+        const m = document.getElementById(modalId);
+        if (m) {
+          m.style.display = 'none';
+          m.classList.remove('active');
+        }
+      }
+
+      // Cerrar modal al presionar Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal, .modal-overlay').forEach(m => {
+            m.style.display = 'none';
+            m.classList.remove('active');
+          });
+        }
+      });
+
+      function cambiarTabSeguridad(tabName) {
+        document.querySelectorAll('.sec-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.sec-panel').forEach(panel => panel.classList.remove('active'));
+        
+        const activeBtn = Array.from(document.querySelectorAll('.sec-tab-btn')).find(b => b.getAttribute('onclick').includes(tabName));
+        if (activeBtn) activeBtn.classList.add('active');
+        
+        const targetPanel = document.getElementById('panel-' + tabName);
+        if (targetPanel) targetPanel.classList.add('active');
+        
+        // Mantener URL limpia
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tabName);
+        window.history.replaceState({}, '', url);
+      }
+
+      function filtrarTablaUsuarios() {
+        const query = document.getElementById('filtro-usuarios').value.toLowerCase().trim();
+        const rows = document.querySelectorAll('#tabla-usuarios tbody tr');
+        rows.forEach(r => {
+          const text = (r.getAttribute('data-user-row') || '').toLowerCase();
+          r.style.display = text.includes(query) ? '' : 'none';
+        });
+      }
+
+      // ================= Modales y Acciones =================
+
+      function abrirModalCrearUsuario() {
+        console.log('[AZZEN Seg] abrirModalCrearUsuario');
+        const form = document.getElementById('form-crear-usuario');
+        if (form) form.reset();
+        abrirModal('modal-crear-usuario');
+      }
+
+      async function crearUsuarioSubmit(e) {
+        e.preventDefault();
+        const payload = {
+          credential: document.getElementById('nu-credential').value.trim(),
+          display_name: document.getElementById('nu-name').value.trim(),
+          email: document.getElementById('nu-email').value.trim(),
+          password: document.getElementById('nu-pass').value.trim(),
+          role: document.getElementById('nu-role').value,
+          enviar_codigo_inmediato: document.getElementById('nu-enviar-codigo').checked
+        };
+        try {
+          const res = await fetch('/api/seguridad/usuarios/crear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            alert('Usuario creado exitosamente.' + (data.codigo_simulado ? ' Código de verificación generado: ' + data.codigo_simulado : ''));
+            window.location.reload();
+          } else {
+            alert('Error al crear usuario: ' + (data.error || 'Operación denegada'));
+          }
+        } catch (err) {
+          alert('Error de conexión al crear usuario.');
+        }
+      }
+
+      function abrirModalEditarUsuario(id, cred, name, role, estado) {
+        console.log('[AZZEN Seg] abrirModalEditarUsuario', id, cred, name, role, estado);
+        document.getElementById('eu-id').value = id;
+        document.getElementById('eu-display').value = name + ' (' + cred + ')';
+        document.getElementById('eu-role').value = role;
+        document.getElementById('eu-estado').value = estado;
+        document.getElementById('eu-motivo').value = '';
+        abrirModal('modal-editar-usuario');
+      }
+
+      async function guardarEdicionUsuarioSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('eu-id').value;
+        const role = document.getElementById('eu-role').value;
+        const estado = document.getElementById('eu-estado').value;
+        const motivo = document.getElementById('eu-motivo').value.trim();
+
+        try {
+          const resRol = await fetch('/api/seguridad/usuarios/' + id + '/rol', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, motivo })
+          });
+          const resEst = await fetch('/api/seguridad/usuarios/' + id + '/estado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado, motivo })
+          });
+          if (resRol.ok && resEst.ok) {
+            alert('Usuario actualizado correctamente.');
+            window.location.reload();
+          } else {
+            alert('Error al actualizar el usuario.');
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      function abrirModalResetPassword(id, cred) {
+        console.log('[AZZEN Seg] abrirModalResetPassword', id, cred);
+        document.getElementById('rp-id').value = id;
+        document.getElementById('rp-credential').textContent = cred;
+        document.getElementById('rp-new-pass').value = '';
+        document.getElementById('rp-motivo').value = '';
+        document.getElementById('rp-inputs-container').style.display = 'block';
+        document.getElementById('rp-submit-btn').style.display = 'inline-block';
+        document.getElementById('rp-result-box').style.display = 'none';
+        document.getElementById('rp-generated-pass').textContent = '--------';
+        abrirModal('modal-reset-password');
+      }
+
+      async function resetPasswordSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('rp-id').value;
+        const new_password = document.getElementById('rp-new-pass').value;
+        const motivo = document.getElementById('rp-motivo').value.trim();
+
+        try {
+          const res = await fetch('/api/seguridad/usuarios/' + id + '/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ new_password, motivo })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            if (data.temp_password) {
+              document.getElementById('rp-inputs-container').style.display = 'none';
+              document.getElementById('rp-submit-btn').style.display = 'none';
+              document.getElementById('rp-result-box').style.display = 'block';
+              document.getElementById('rp-generated-pass').textContent = data.temp_password;
+            } else {
+              alert(data.message || 'Contraseña restablecida con éxito.');
+              cerrarModal('modal-reset-password');
+            }
+          } else {
+            alert('Error: ' + (data.error || 'No se pudo restablecer la contraseña.'));
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      function copiarClaveTemporalGenerada() {
+        const pass = document.getElementById('rp-generated-pass').textContent.trim();
+        if (pass && pass !== '--------') {
+          navigator.clipboard.writeText(pass).then(() => {
+            alert('✓ Credencial temporal copiada al portapapeles.');
+          }).catch(() => {
+            alert('Clave: ' + pass);
+          });
+        }
+      }
+
+      function abrirModalResetTotp(id, cred) {
+        console.log('[AZZEN Seg] abrirModalResetTotp', id, cred);
+        document.getElementById('rt-id').value = id;
+        document.getElementById('rt-credential').textContent = cred;
+        document.getElementById('rt-motivo').value = '';
+        abrirModal('modal-reset-totp');
+      }
+
+      async function resetTotpSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('rt-id').value;
+        const motivo = document.getElementById('rt-motivo').value.trim();
+
+        try {
+          const res = await fetch('/api/seguridad/usuarios/' + id + '/reset-totp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            alert(data.message || 'Factor 2FA TOTP restablecido exitosamente.');
+            window.location.reload();
+          } else {
+            alert('Error: ' + (data.error || 'No se pudo restablecer el TOTP.'));
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      function abrirModalSuspenderUsuario(id, cred, name, nuevoEstado) {
+        console.log('[AZZEN Seg] abrirModalSuspenderUsuario', id, cred, name, nuevoEstado);
+        document.getElementById('ceu-id').value = id;
+        document.getElementById('ceu-estado').value = nuevoEstado;
+        const esSuspender = (nuevoEstado === 'suspendido');
+        document.getElementById('ceu-titulo').innerHTML = esSuspender 
+          ? '<span>🚫</span> Suspender Acceso a Cuenta' 
+          : '<span>✅</span> Reactivar Acceso a Cuenta';
+        document.getElementById('ceu-mensaje').innerHTML = esSuspender
+          ? '¿Confirma suspender al usuario <strong>' + escapeHtml(name) + '</strong> (Credencial: <code style="font-weight:700;">' + escapeHtml(cred) + '</code>)?<br/><small style="color:#b91c1c; font-weight:600; display:block; margin-top:4px;">Todas sus sesiones activas serán inmediatamente revocadas.</small>'
+          : '¿Confirma reactivar el acceso para el usuario <strong>' + escapeHtml(name) + '</strong> (Credencial: <code style="font-weight:700;">' + escapeHtml(cred) + '</code>)?';
+        document.getElementById('ceu-motivo').value = '';
+        const btn = document.getElementById('ceu-btn-confirmar');
+        btn.textContent = esSuspender ? 'Confirmar Suspensión' : 'Confirmar Reactivación';
+        btn.style.background = esSuspender ? '#dc2626' : '#16a34a';
+        btn.style.borderColor = esSuspender ? '#b91c1c' : '#15803d';
+        
+        abrirModal('modal-confirmar-suspension');
+      }
+
+      async function confirmarCambioEstadoUsuarioSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('ceu-id').value;
+        const estado = document.getElementById('ceu-estado').value;
+        const motivo = document.getElementById('ceu-motivo').value.trim();
+
+        try {
+          const res = await fetch('/api/seguridad/usuarios/' + id + '/estado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado, motivo })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            alert('Estado de cuenta actualizado a "' + estado + '" exitosamente.');
+            window.location.reload();
+          } else {
+            alert('Error al actualizar estado: ' + (data.error || 'Operación fallida'));
+          }
+        } catch(err) {
+          alert('Error de conexión al servidor.');
+        }
+      }
+
+      async function reenviarCodigoUsuario(id, email) {
+        try {
+          const res = await fetch('/api/seguridad/usuarios/' + id + '/reenviar-codigo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            alert('Código de verificación generado para ' + email + ':\n\n' + (data.codigo_simulado || 'Enviado'));
+          } else {
+            alert('Error al generar código: ' + (data.error || 'Operación denegada'));
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      // ================= Políticas de Seguridad =================
+
+      async function guardarPoliticasSeguridad(e) {
+        e.preventDefault();
+        const statusSpan = document.getElementById('pol-save-status');
+        statusSpan.textContent = 'Guardando...';
+        statusSpan.style.color = '#0284c7';
+
+        const payload = {
+          session_idle_minutes: parseInt(document.getElementById('pol-session-idle').value, 10),
+          session_absolute_hours: parseInt(document.getElementById('pol-session-abs').value, 10),
+          max_login_attempts: parseInt(document.getElementById('pol-max-attempts').value, 10),
+          lockout_duration_minutes: parseInt(document.getElementById('pol-lockout-mins').value, 10),
+          mfa_policy: document.getElementById('pol-mfa-policy').value,
+          temp_code_expiry_minutes: parseInt(document.getElementById('pol-code-expiry').value, 10),
+          max_temp_code_resends: parseInt(document.getElementById('pol-code-resends').value, 10),
+          single_session_per_user: document.getElementById('pol-single-session').checked,
+          require_device_approval: document.getElementById('pol-require-device').checked,
+          password_min_length: parseInt(document.getElementById('pol-pass-min-len').value, 10),
+          password_require_special: document.getElementById('pol-pass-special').checked
+        };
+
+        try {
+          const res = await fetch('/api/seguridad/politicas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            statusSpan.textContent = '✓ Políticas guardadas exitosamente.';
+            statusSpan.style.color = '#166534';
+            setTimeout(() => { statusSpan.textContent = ''; }, 4000);
+          } else {
+            statusSpan.textContent = '✕ Error al guardar: ' + (data.error || 'Operación fallida');
+            statusSpan.style.color = '#b91c1c';
+          }
+        } catch(err) {
+          statusSpan.textContent = '✕ Error de red.';
+          statusSpan.style.color = '#b91c1c';
+        }
+      }
+
+      // ================= Dispositivos =================
+
+      function abrirModalRegistrarDispositivo() {
+        console.log('[AZZEN Seg] abrirModalRegistrarDispositivo');
+        abrirModal('modal-registrar-dispositivo');
+      }
+
+      async function registrarDispositivoSubmit(e) {
+        e.preventDefault();
+        const payload = {
+          user_id: parseInt(document.getElementById('rd-user-id').value, 10),
+          nombre_dispositivo: document.getElementById('rd-nombre').value.trim(),
+          sistema_operativo: document.getElementById('rd-so').value.trim(),
+          navegador: document.getElementById('rd-nav').value.trim()
+        };
+        try {
+          const res = await fetch('/api/seguridad/dispositivos/registrar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            alert('Dispositivo registrado correctamente.');
+            window.location.reload();
+          } else {
+            alert('Error al registrar dispositivo.');
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      
+      function abrirModalHabilitarRevocado(id, usuario, uuid) {
+        document.getElementById('hr-disp-id').value = id;
+        document.getElementById('hr-info-disp').textContent = uuid;
+        document.getElementById('hr-info-user').textContent = usuario;
+        document.getElementById('hr-totp-code').value = '';
+        document.getElementById('hr-error').style.display = 'none';
+        abrirModal('modal-habilitar-dispositivo-2fa');
+        setTimeout(() => {
+          document.getElementById('hr-totp-code').focus();
+        }, 150);
+      }
+
+      async function habilitarDispositivoRevocadoSubmit(e) {
+        e.preventDefault();
+        const dispId = document.getElementById('hr-disp-id').value;
+        const totpCode = document.getElementById('hr-totp-code').value.trim();
+        const motivo = document.getElementById('hr-motivo').value.trim() || 'Rehabilitación autorizada de terminal revocado';
+        const errDiv = document.getElementById('hr-error');
+        const btn = document.getElementById('hr-btn-submit');
+
+        if (totpCode.length !== 6 || !/^\d{6}$/.test(totpCode)) {
+          errDiv.textContent = 'El código debe tener exactamente 6 dígitos numéricos.';
+          errDiv.style.display = 'block';
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Verificando 2FA...';
+        errDiv.style.display = 'none';
+
+        try {
+          const res = await fetch('/api/seguridad/dispositivos/' + dispId + '/estado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              estado: 'aprobado',
+              motivo: motivo,
+              codigo_totp: totpCode
+            })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            window.location.reload();
+          } else {
+            errDiv.textContent = data.error || 'Error al validar el código 2FA o rehabilitar el dispositivo.';
+            errDiv.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = '✓ Confirmar y Habilitar';
+          }
+        } catch (err) {
+          errDiv.textContent = 'Error de conexión con el servidor.';
+          errDiv.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = '✓ Confirmar y Habilitar';
+        }
+      }
+
+      async function cambiarEstadoDispositivo(id, estado) {
+        const conf = confirm('¿Confirmar cambio de estado de dispositivo a "' + estado + '"?');
+        if (!conf) return;
+        try {
+          const res = await fetch('/api/seguridad/dispositivos/' + id + '/estado', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado, motivo: 'Acción desde Centro de Seguridad' })
+          });
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('Error al modificar dispositivo.');
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      // ================= Solicitudes =================
+
+      function abrirModalCrearSolicitud() {
+        console.log('[AZZEN Seg] abrirModalCrearSolicitud');
+        abrirModal('modal-crear-solicitud');
+      }
+
+      async function crearSolicitudSubmit(e) {
+        e.preventDefault();
+        const payload = {
+          tipo: document.getElementById('cs-tipo').value,
+          usuario_afectado_id: document.getElementById('cs-usuario').value ? parseInt(document.getElementById('cs-usuario').value, 10) : null,
+          motivo: document.getElementById('cs-motivo').value.trim()
+        };
+        try {
+          const res = await fetch('/api/seguridad/solicitudes/crear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            alert('Solicitud enviada a la cola de revisión formal.');
+            window.location.reload();
+          } else {
+            alert('Error al enviar solicitud.');
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      function resolverSolicitudModal(id, decision) {
+        console.log('[AZZEN Seg] resolverSolicitudModal', id, decision);
+        document.getElementById('rs-id').value = id;
+        document.getElementById('rs-decision').value = decision;
+        document.getElementById('rs-titulo').textContent = decision === 'aprobar' ? '✓ Aprobar Solicitud #' + id : '✕ Rechazar Solicitud #' + id;
+        document.getElementById('rs-desc').textContent = decision === 'aprobar' 
+          ? 'Va a conceder formalmente la solicitud. Por principio de separación de funciones, el sistema validará que usted no sea el solicitante.'
+          : 'Va a rechazar la solicitud. Se requiere fundamento obligatorio.';
+        document.getElementById('rs-motivo').value = '';
+        document.getElementById('rs-btn-confirmar').textContent = decision === 'aprobar' ? 'Confirmar Aprobación' : 'Confirmar Rechazo';
+        abrirModal('modal-resolver-solicitud');
+      }
+
+      async function resolverSolicitudSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('rs-id').value;
+        const decision = document.getElementById('rs-decision').value;
+        const motivo = document.getElementById('rs-motivo').value.trim();
+
+        try {
+          const res = await fetch('/api/seguridad/solicitudes/' + id + '/resolver', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ decision, motivo })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            alert('Solicitud resuelta correctamente.');
+            window.location.reload();
+          } else {
+            alert('Infracción o Error: ' + (data.error || 'No se pudo resolver la solicitud.'));
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      // ================= Sesiones =================
+
+      async function revocarSesion(sid) {
+        const motivo = prompt('Indique el motivo de revocación / expulsión de esta sesión:', 'Revocación administrativa desde Centro de Seguridad');
+        if (motivo === null) return;
+        try {
+          const res = await fetch('/api/seguridad/sesiones/' + sid + '/revocar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo: motivo.trim() || 'Revocación administrativa' })
+          });
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('Error al revocar sesión.');
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      async function revocarTodasLasSesiones() {
+        if (!confirm('¿Cerrar todas las demás sesiones activas en el sistema?')) return;
+        try {
+          const res = await fetch('/api/seguridad/sesiones/revocar-todas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          if (res.ok) {
+            alert('Todas las demás sesiones fueron invalidadas.');
+            window.location.reload();
+          } else {
+            alert('Error al revocar sesiones.');
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      // ================= RBAC Toggles =================
+
+      async function togglePermiso(role, recurso, accion, nuevoValor) {
+        try {
+          const res = await fetch('/api/seguridad/roles-permisos/toggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, recurso, accion, permitido: nuevoValor })
+          });
+          if (res.ok) {
+            window.location.reload();
+          } else {
+            alert('Error al conmutar permiso.');
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      // ================= Alertas =================
+
+      function resolverAlertaModal(id) {
+        console.log('[AZZEN Seg] resolverAlertaModal', id);
+        document.getElementById('ra-id').value = id;
+        document.getElementById('ra-motivo').value = '';
+        abrirModal('modal-resolver-alerta');
+      }
+
+      async function resolverAlertaSubmit(e) {
+        e.preventDefault();
+        const id = document.getElementById('ra-id').value;
+        const motivo = document.getElementById('ra-motivo').value.trim();
+        try {
+          const res = await fetch('/api/seguridad/alertas/' + id + '/resolver', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo })
+          });
+          if (res.ok) {
+            alert('Alerta marcada como resuelta.');
+            window.location.reload();
+          } else {
+            alert('Error al resolver alerta.');
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      async function generarAlertaPrueba() {
+        try {
+          const res = await fetch('/api/seguridad/alertas/generar-prueba', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          if (res.ok) {
+            window.location.reload();
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      // ================= Códigos y Verificación de Correo =================
+
+      async function probarConexionSmtp() {
+        const email = document.getElementById('smtp-test-email').value.trim();
+        const statusEl = document.getElementById('smtp-test-status');
+        const btn = document.getElementById('btn-probar-smtp');
+        if (!email) {
+          alert('Por favor introduzca una dirección de correo.');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+        statusEl.textContent = 'Conectando con smtp.gmail.com:587 y transmitiendo mensaje de prueba TLS...';
+        statusEl.style.color = '#0284c7';
+
+        try {
+          const res = await fetch('/api/seguridad/email/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            statusEl.textContent = '✓ ' + (data.message || 'Correo de prueba enviado con éxito.');
+            statusEl.style.color = '#16a34a';
+          } else {
+            statusEl.textContent = '✕ Error: ' + (data.error || 'No se pudo enviar el correo.');
+            statusEl.style.color = '#dc2626';
+          }
+        } catch(err) {
+          statusEl.textContent = '✕ Error de conexión con el servidor.';
+          statusEl.style.color = '#dc2626';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '✉️ Enviar Prueba';
+        }
+      }
+
+      async function simularGenerarCodigo() {
+        const userId = document.getElementById('sim-user-select').value;
+        try {
+          const res = await fetch('/api/seguridad/usuarios/' + userId + '/reenviar-codigo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            document.getElementById('sim-box-codigo').style.display = 'block';
+            document.getElementById('sim-display-codigo').textContent = data.codigo_simulado || '123456';
+            document.getElementById('sim-input-codigo').value = data.codigo_simulado || '';
+            document.getElementById('sim-res-status').textContent = '✓ Código generado y enviado por correo a ' + (data.email || 'la casilla del usuario') + ' (Hash persistido en BD).';
+            document.getElementById('sim-res-status').style.color = '#166534';
+          } else {
+            alert('Error: ' + (data.error || 'Operación fallida'));
+          }
+        } catch(err) {
+          alert('Error de conexión.');
+        }
+      }
+
+      async function simularValidarCodigo() {
+        const userId = document.getElementById('sim-user-select').value;
+        const codigo = document.getElementById('sim-input-codigo').value.trim();
+        const resStatus = document.getElementById('sim-res-status');
+        if (!codigo) {
+          alert('Por favor introduzca el código de 6 dígitos.');
+          return;
+        }
+        try {
+          const res = await fetch('/api/seguridad/usuarios/' + userId + '/verificar-codigo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigo })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            resStatus.textContent = '✓ ' + (data.message || 'Correo verificado exitosamente.');
+            resStatus.style.color = '#166534';
+            setTimeout(() => { window.location.reload(); }, 1500);
+          } else {
+            resStatus.textContent = '✕ Error: ' + (data.error || 'Código incorrecto o expirado.');
+            resStatus.style.color = '#b91c1c';
+          }
+        } catch(err) {
+          resStatus.textContent = '✕ Error de conexión.';
+          resStatus.style.color = '#b91c1c';
+        }
+      }
+    </script>
+  </body>
+</html>

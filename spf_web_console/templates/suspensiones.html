@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Control de Suspensiones · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/style.css?v=20261025_11" />
+    <script>
+      function openLevantarModal(id, credencial, nombre, expNum) {
+        document.getElementById('modal-susp-id').value = id;
+        document.getElementById('modal-susp-info').textContent = nombre + ' (Cred. ' + credencial + ')' + (expNum ? ' · Exp: ' + expNum : '');
+        document.getElementById('modal-levantar-form').action = '/suspensiones/' + id + '/levantar';
+        document.getElementById('modal-levantar').style.display = 'flex';
+      }
+      function closeLevantarModal() {
+        document.getElementById('modal-levantar').style.display = 'none';
+      }
+    </script>
+  </head>
+  <body>
+        <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <div class="notif-wrapper" style="position:relative;">
+          <button id="notif-bell-btn" class="notif-bell-btn" type="button" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
+            🔔
+            <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+            <div class="notif-dropdown-header">
+              <span style="font-weight:700;">Notificaciones</span>
+              <a href="javascript:void(0)" onclick="marcarTodasLeidas()" style="font-size:12px; color:var(--azzen-orange);">Marcar leídas</a>
+            </div>
+            <div id="notif-items-list" class="notif-items-list">
+              <div class="notif-empty">Cargando...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="/notificaciones">Ver todas las notificaciones →</a>
+            </div>
+          </div>
+        </div>
+
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+            <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item active">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+          <a href="/notificaciones" class="nav-item">
+            <span>🔔</span> Notificaciones
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          {% for f in nav_files %}
+          <details>
+            <summary>📊 {{ f.file_name }}</summary>
+            <div class="subnav">
+              {% for s in f.sheets %}
+              <a href="/fuente/{{ f.file_id }}/hoja/{{ s.sheet_id }}">{{ s.sheet_name }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Búsqueda global
+          </a>
+          <a href="/personas" class="nav-item">
+            <span>👥</span> Personas
+          </a>
+          <a href="/staging" class="nav-item">
+            <span>⚠️</span> Staging sin credencial
+          </a>
+          <a href="/modulos" class="nav-item">
+            <span>📦</span> Catálogo de Módulos
+          </a>
+          <a href="/modulos/dashboard" class="nav-item">
+            <span>📊</span> Dashboard Estadístico
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Auditoría y Sistema</div>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🧹</span> Calidad de Datos
+          </a>
+          <a href="/administracion/versiones" class="nav-item">
+            <span>📜</span> Control de versiones
+          </a>
+          <a href="/seguridad" class="nav-item">
+            <span>🛡️</span> Centro de Seguridad
+          </a>
+        </div>
+      </aside>
+      <main class="content">
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li class="is-active"><a href="/suspensiones">Control de Suspensiones</a></li>
+          </ul>
+        </div>
+
+        <div class="mc-header-bar">
+          <div>
+            <h1 class="mc-header-title">
+              <span>🛡️</span>
+              <span>Control Central de Suspensiones Preventivas</span>
+            </h1>
+            <p class="mc-header-subtitle">
+              Registro, seguimiento, marco normativo (Art. 419 RRD) y levantamiento formal con fundamentación.
+            </p>
+          </div>
+          <div class="mc-header-actions">
+            <a href="/expedientes" class="button is-dark is-outlined btn-sm">
+              <span>← Ver Actuaciones</span>
+            </a>
+          </div>
+        </div>
+
+        {% if let Some(msg) = success_msg %}
+        <div class="alert-success">✓ {{ msg }}</div>
+        {% endif %}
+        {% if let Some(err) = error_msg %}
+        <div class="alert-error">✕ {{ err }}</div>
+        {% endif %}
+
+        <div class="form-card" style="padding:16px; margin-bottom:16px;">
+          <form method="get" class="filters" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end; margin:0;">
+            <div class="form-field" style="margin:0;">
+              <label for="input-q">Credencial, agente o expediente</label>
+              <input id="input-q" name="q" value="{{ q }}" placeholder="Buscar por credencial o nombre..." />
+            </div>
+            <div class="form-field" style="margin:0;">
+              <label for="select-estado">Estado de la suspensión</label>
+              <select id="select-estado" name="estado">
+                <option value="">-- Todos los estados --</option>
+                {% for est in estados_list %}
+                <option value="{{ est }}" {% if est == &estado %}selected{% endif %}>
+                  {% if est == "Vigente" %}Vigente (Activa)
+                  {% else if est == "Levantado" || est == "Levantada" %}Levantada / Levantado
+                  {% else if est == "En revision" || est == "En revisión" %}En revisión
+                  {% else if est == "Suspendido" %}Suspendido
+                  {% else if est == "Finalizada" %}Finalizada (Cesantía/Sanción)
+                  {% else %}{{ est }}
+                  {% endif %}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-field" style="margin:0;">
+              <label for="select-art">Artículo 419 Inciso</label>
+              <select id="select-art" name="articulo">
+                <option value="">-- Todos los incisos --</option>
+                <option value="a)" {% if articulo == "a)" %}selected{% endif %}>Inciso a)</option>
+                <option value="b)" {% if articulo == "b)" %}selected{% endif %}>Inciso b)</option>
+                <option value="c)" {% if articulo == "c)" %}selected{% endif %}>Inciso c)</option>
+                <option value="d)" {% if articulo == "d)" %}selected{% endif %}>Inciso d)</option>
+                <option value="e)" {% if articulo == "e)" %}selected{% endif %}>Inciso e)</option>
+              </select>
+            </div>
+            <div class="form-field" style="margin:0; min-width:130px;">
+              <label for="select-size">Por página</label>
+              <select id="select-size" name="size" onchange="this.form.submit()">
+                <option value="5" {% if size == 5 %}selected{% endif %}>5 por página</option>
+                <option value="10" {% if size == 10 %}selected{% endif %}>10 por página</option>
+                <option value="20" {% if size == 20 %}selected{% endif %}>20 por página</option>
+                <option value="50" {% if size == 50 %}selected{% endif %}>50 por página</option>
+              </select>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button type="submit" class="btn-primary" style="height:38px; width:100%;">Filtrar</button>
+              <a href="/suspensiones" class="btn-secondary" style="height:38px; padding:8px 12px;" title="Limpiar filtros">✕</a>
+            </div>
+          </form>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+          <p class="muted" style="margin:0;">Total de suspensiones registradas: <strong>{{ total_rows }}</strong> · Página {{ page }} de {{ total_pages }}</p>
+          <div>
+            <a href="/export/suspensiones.xlsx?q={{ q }}&estado={{ estado }}&articulo={{ articulo }}" class="button btn-sm" style="background:#107c41; color:#ffffff; border:1px solid #0e6c38; font-weight:700; display:inline-flex; align-items:center; gap:6px; padding:5px 12px; text-decoration:none;" title="Descargar suspensiones filtradas en formato Excel (.xlsx)">
+              <span>📊</span> Descargar Excel (.xlsx)
+            </a>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="mc-table">
+            <thead>
+              <tr>
+                <th style="width:200px;">Agente (Credencial)</th>
+                <th style="width:190px;">Expediente</th>
+                <th style="width:110px; text-align:center; white-space:nowrap;">Fecha Inicio</th>
+                <th style="width:130px; text-align:center;">Encuadre (Art. 419)</th>
+                <th style="width:100px; text-align:center;">Estado</th>
+                <th style="min-width:180px; max-width:260px;">Fecha Fin / Motivo</th>
+                <th style="width:120px; text-align:center;">Documentación</th>
+                <th style="width:180px; text-align:center; white-space:nowrap;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows %}
+              <tr data-id="{{ r.id }}" data-credencial="{{ r.credencial }}" data-nombre="{{ r.nombre_completo }}" data-expediente="{{ r.numero_expediente.as_deref().unwrap_or("Sin vincular") }}" data-exp-id="{{ r.expediente_id.unwrap_or(0) }}" data-fecha-inicio="{{ r.fecha_inicio }}" data-articulo="{{ r.articulo_419_incisos }}" data-estado="{{ r.estado }}" data-fecha-fin="{{ r.fecha_fin.as_deref().unwrap_or("—") }}" ondblclick="openInvestigarSuspModal(this)">
+                <td>
+                  <div class="cell-truncate-lg">
+                    <strong style="color:var(--azzen-dark);">{{ r.nombre_completo }}</strong>
+                  </div>
+                  <a href="/agentes/{{ r.credencial }}/historial" style="font-size:12px; font-weight:700; color:var(--azzen-orange); text-decoration:none;" title="Ver legajo del agente">
+                    Credencial: {{ r.credencial }} ↗
+                  </a>
+                </td>
+                <td class="cell-nowrap">
+                  {% if let Some(exp_id) = r.expediente_id %}
+                  <a href="/expedientes/{{ exp_id }}" style="font-family:'Ubuntu Mono',monospace; font-weight:700; color:var(--azzen-dark); text-decoration:none;" title="Ver expediente">
+                    {{ r.numero_expediente.as_deref().unwrap_or("Ver expediente") }}
+                  </a>
+                  {% else %}
+                  <span class="muted" style="font-size:12.5px;">{{ r.numero_expediente.as_deref().unwrap_or("Sin vincular") }}</span>
+                  {% endif %}
+                </td>
+                <td style="text-align:center;" class="cell-nowrap">
+                  <span style="font-size:12.5px; color:var(--azzen-text-secondary);">{{ r.fecha_inicio }}</span>
+                </td>
+                <td style="text-align:center;">
+                  <span class="mc-badge estado-entregado">Art. 419 {{ r.articulo_419_incisos }}</span>
+                </td>
+                <td style="text-align:center;">
+                  {% if r.estado == "Vigente" %}
+                  <span class="mc-badge estado-rechazada">Vigente</span>
+                  {% else if r.estado == "Levantada" %}
+                  <span class="mc-badge estado-aprobada">Levantada</span>
+                  {% else %}
+                  <span class="mc-badge estado-pendiente">{{ r.estado }}</span>
+                  {% endif %}
+                </td>
+                <td class="cell-interactive" onclick="openInvestigarSuspModal(this)" title="Haga clic para ver el detalle de finalización">
+                  <div class="cell-truncate">
+                    {% if let Some(f_fin) = r.fecha_fin.as_deref() %}
+                      <span style="font-weight:600; font-size:12.5px;">{{ f_fin }}</span>
+                      <span class="muted" style="font-size:11.5px; margin-left:4px;">{{ r.motivo_fin.as_deref().unwrap_or("") }}</span>
+                      <div class="raw-data-motivo-fin" style="display:none;">{{ r.motivo_fin.as_deref().unwrap_or("") }}</div>
+                    {% else %}
+                      <span class="muted">— Vigente</span>
+                      <div class="raw-data-motivo-fin" style="display:none;">Actualmente en vigencia (en curso).</div>
+                    {% endif %}
+                  </div>
+                </td>
+                <td style="text-align:center; white-space:nowrap;">
+                  {% if let Some(pdf) = r.archivo_disposicion_pdf.as_deref() %}
+                  <a href="/documentos/{{ pdf }}" target="_blank" class="button is-dark is-outlined btn-xs" style="padding:2px 6px; font-size:11px;" title="Disposición de suspensión">📄 Inicio</a>
+                  {% endif %}
+                  {% if let Some(pdf) = r.archivo_levantamiento_pdf.as_deref() %}
+                  <a href="/documentos/{{ pdf }}" target="_blank" class="button is-dark is-outlined btn-xs" style="padding:2px 6px; font-size:11px;" title="Disposición de levantamiento">📄 Cierre</a>
+                  {% endif %}
+                  {% if r.archivo_disposicion_pdf.is_none() && r.archivo_levantamiento_pdf.is_none() %}
+                  <span class="muted" style="font-size:11px;">Sin adjuntos</span>
+                  {% endif %}
+                </td>
+                <td style="text-align:center; white-space:nowrap;">
+                  <div class="row-actions">
+                    <button type="button" class="btn-investigar" onclick="openInvestigarSuspModal(this)" title="Investigar y ver contenido total de la suspensión">
+                      <span>🔍</span> Investigar
+                    </button>
+                    <button type="button" class="btn-editar-fila" onclick="openEditarFilaNovedadModal(this)" title="Editar / Agregar novedad sobre esta fila">
+                      <span>✏️</span>
+                    </button>
+                    {% if r.estado == "Vigente" %}
+                    <button type="button" class="btn-investigar" style="color:var(--azzen-orange); border-color:var(--azzen-orange);" onclick="openLevantarModal('{{ r.id }}', '{{ r.credencial }}', '{{ r.nombre_completo }}', '{{ r.numero_expediente.as_deref().unwrap_or("") }}')" title="Levantar o concluir medida">
+                      🔓 Fin
+                    </button>
+                    {% endif %}
+                    <div class="actions-dropdown">
+                      <button type="button" class="btn-investigar" style="padding:4px 6px;" onclick="event.stopPropagation(); toggleDropdown(this)" title="Más opciones">▾</button>
+                      <div class="dropdown-content">
+                        <a href="/agentes/{{ r.credencial }}/historial">👤 Legajo del Agente</a>
+                        {% if let Some(exp_id) = r.expediente_id %}
+                        <a href="/expedientes/{{ exp_id }}">📁 Ver Expediente</a>
+                        <a href="/expedientes/{{ exp_id }}?tab=tab-suspensiones">⚖️ Pestaña Suspensiones</a>
+                        {% endif %}
+                        {% if r.estado == "Vigente" %}
+                        <a href="javascript:void(0)" onclick="openLevantarModal('{{ r.id }}', '{{ r.credencial }}', '{{ r.nombre_completo }}', '{{ r.numero_expediente.as_deref().unwrap_or("") }}')">
+                          🔓 Levantar / Finalizar
+                        </a>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+              {% if rows.is_empty() %}
+              <tr>
+                <td colspan="8" style="text-align:center; padding:32px;" class="muted">
+                  No se encontraron suspensiones con los filtros seleccionados.
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager" style="margin-top:14px;">
+          {% if page > 1 %}
+          <a href="/suspensiones?q={{ q }}&estado={{ estado }}&articulo={{ articulo }}&page={{ page - 1 }}&size={{ size }}" class="btn-secondary btn-sm">← Anterior</a>
+          {% endif %}
+          <span class="muted" style="font-size:13px;">Página <strong>{{ page }}</strong> de {{ total_pages }}</span>
+          {% if page < total_pages %}
+          <a href="/suspensiones?q={{ q }}&estado={{ estado }}&articulo={{ articulo }}&page={{ page + 1 }}&size={{ size }}" class="btn-secondary btn-sm">Siguiente →</a>
+          {% endif %}
+        </div>
+
+        <!-- MODAL DE INVESTIGACIÓN DE SUSPENSIÓN PREVENTIVA -->
+        <div id="modal-investigar-suspension" class="modal-overlay" style="display:none;" onclick="if(event.target===this) closeInvestigarSuspModal();">
+          <div class="modal-investigar-box">
+            <div class="modal-investigar-header">
+              <div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                  <span id="inv-susp-estado" class="mc-badge estado-rechazada">Vigente</span>
+                  <span id="inv-susp-credencial" class="mc-badge estado-en_preparacion">Credencial</span>
+                </div>
+                <h2 id="inv-susp-nombre" style="margin:0; font-size:18px; color:var(--azzen-dark);"></h2>
+              </div>
+              <button type="button" class="btn-close" onclick="closeInvestigarSuspModal()">✕</button>
+            </div>
+
+            <div class="modal-investigar-body">
+              <div class="investigar-grid-fields">
+                <div class="investigar-field-item">
+                  <span class="investigar-field-label">Expediente Asociado</span>
+                  <span id="inv-susp-expediente" class="investigar-field-val" style="font-family:'Ubuntu Mono',monospace;"></span>
+                </div>
+                <div class="investigar-field-item">
+                  <span class="investigar-field-label">Fecha Inicio de Medida</span>
+                  <span id="inv-susp-fecha-inicio" class="investigar-field-val"></span>
+                </div>
+                <div class="investigar-field-item">
+                  <span class="investigar-field-label">Encuadre Legal</span>
+                  <span id="inv-susp-articulo" class="investigar-field-val"></span>
+                </div>
+                <div class="investigar-field-item">
+                  <span class="investigar-field-label">Fecha Efectiva de Conclusión</span>
+                  <span id="inv-susp-fecha-fin" class="investigar-field-val"></span>
+                </div>
+              </div>
+
+              <div class="investigar-text-card">
+                <div class="investigar-text-title">
+                  <span>📄 Fundamentación y Motivo Administrativo</span>
+                  <button type="button" class="button is-dark is-outlined btn-sm" onclick="copiarTextoDeElemento('inv-susp-motivo-fin', this)" style="padding:2px 8px; font-size:11px;">
+                    📋 Copiar texto
+                  </button>
+                </div>
+                <div id="inv-susp-motivo-fin" class="investigar-text-content"></div>
+              </div>
+            </div>
+
+            <div class="modal-investigar-footer">
+              <button type="button" class="button is-dark is-outlined btn-sm" onclick="closeInvestigarSuspModal()">Cerrar</button>
+              <div style="display:flex; gap:8px;">
+                <a id="inv-susp-btn-exp" href="#" class="button is-dark is-outlined btn-sm">📁 Ver Expediente</a>
+                <a id="inv-susp-btn-agente" href="#" class="button is-azzen btn-sm">👤 Ver Legajo del Agente →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODAL LEVANTAR / FINALIZAR SUSPENSIÓN -->
+        <div id="modal-levantar" class="modal-overlay" style="display:none;">
+          <div class="modal-box">
+            <div class="modal-header">
+              <h3 style="margin:0;">Levantar / Finalizar Suspensión Preventiva</h3>
+              <button type="button" class="btn-close" onclick="closeLevantarModal()">✕</button>
+            </div>
+            <p id="modal-susp-info" class="muted" style="margin-top:4px; font-weight:600;"></p>
+            <form id="modal-levantar-form" method="post" enctype="multipart/form-data">
+              <input type="hidden" id="modal-susp-id" name="suspension_id" value="" />
+              <div class="form-field">
+                <label for="lev-estado">Nuevo estado *</label>
+                <select id="lev-estado" name="estado" required>
+                  <option value="Levantada">Levantada (Reintegro / Medida concluida)</option>
+                  <option value="Finalizada">Finalizada (Por sanción / Cesantía / Exoneración)</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="lev-fecha">Fecha efectiva de levantamiento/fin *</label>
+                <input id="lev-fecha" name="fecha_fin" type="date" required />
+              </div>
+              <div class="form-field">
+                <label for="lev-motivo">Motivo administrativo *</label>
+                <input id="lev-motivo" name="motivo_fin" placeholder="Ej: Disposición N° ..., Sentencia judicial, etc." required />
+              </div>
+              <div class="form-field">
+                <label for="lev-fundamento">Fundamentación y Considerandos * (Obligatorio)</label>
+                <textarea id="lev-fundamento" name="fundamento_fin" rows="3" placeholder="Detalle los fundamentos administrativos e institucionales que justifican el cese de la suspensión..." required></textarea>
+              </div>
+              <div class="form-field">
+                <label for="lev-pdf">Adjuntar Disposición de Levantamiento / Cierre (PDF)</label>
+                <input id="lev-pdf" name="archivo_pdf" type="file" accept=".pdf" />
+              </div>
+              <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                <button type="button" class="btn-secondary" onclick="closeLevantarModal()">Cancelar</button>
+                <button type="submit" class="btn-primary">Registrar Levantamiento</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </main>
+    </div>
+    <script src="/static/azzen.js?v=20261025_11"></script>
+    <script>
+      function openInvestigarSuspModal(trigger) {
+        const tr = trigger.closest('tr');
+        if (!tr) return;
+
+        const id = tr.getAttribute('data-id') || '';
+        const credencial = tr.getAttribute('data-credencial') || '';
+        const nombre = tr.getAttribute('data-nombre') || '';
+        const expediente = tr.getAttribute('data-expediente') || 'Sin vincular';
+        const expId = tr.getAttribute('data-exp-id') || '';
+        const fechaInicio = tr.getAttribute('data-fecha-inicio') || '-';
+        const articulo = tr.getAttribute('data-articulo') || 'a)';
+        const estado = tr.getAttribute('data-estado') || 'Vigente';
+        const fechaFin = tr.getAttribute('data-fecha-fin') || '—';
+
+        const motivoFinEl = tr.querySelector('.raw-data-motivo-fin');
+        const motivoFin = motivoFinEl ? motivoFinEl.innerText.trim() : '';
+
+        const modal = document.getElementById('modal-investigar-suspension');
+        if (!modal) return;
+
+        const setTxt = (id, val) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = val;
+        };
+
+        setTxt('inv-susp-nombre', nombre);
+        setTxt('inv-susp-credencial', 'Credencial ' + credencial);
+        setTxt('inv-susp-expediente', expediente);
+        setTxt('inv-susp-fecha-inicio', fechaInicio);
+        setTxt('inv-susp-articulo', 'Artículo 419 Inciso ' + articulo);
+        setTxt('inv-susp-fecha-fin', fechaFin);
+        setTxt('inv-susp-motivo-fin', motivoFin || 'Actualmente en curso sin fecha de finalización.');
+
+        const badge = document.getElementById('inv-susp-estado');
+        if (badge) {
+          badge.textContent = estado;
+          badge.className = 'mc-badge ' + (estado === 'Vigente' ? 'estado-rechazada' : 'estado-aprobada');
+        }
+
+        const btnAgente = document.getElementById('inv-susp-btn-agente');
+        if (btnAgente && credencial) btnAgente.href = '/agentes/' + credencial + '/historial';
+
+        const btnExp = document.getElementById('inv-susp-btn-exp');
+        if (btnExp) {
+          if (expId && expId !== '0') {
+            btnExp.href = '/expedientes/' + expId;
+            btnExp.style.display = 'inline-flex';
+          } else {
+            btnExp.style.display = 'none';
+          }
+        }
+
+        if (modal.parentElement !== document.body) {
+          document.body.appendChild(modal);
+        }
+        modal.classList.add('active');
+        modal.classList.add('show');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.zIndex = '999999';
+        modal.style.visibility = 'visible';
+        modal.style.opacity = '1';
+      }
+
+      function closeInvestigarSuspModal() {
+        const modal = document.getElementById('modal-investigar-suspension');
+        if (modal) {
+          modal.classList.remove('active');
+          modal.classList.remove('show');
+          modal.style.setProperty('display', 'none', 'important');
+        }
+      }
+
+      function toggleDropdown(btn) {
+        const menu = btn.nextElementSibling;
+        if (!menu) return;
+        const wasShown = menu.classList.contains('show');
+        document.querySelectorAll('.dropdown-content.show').forEach(el => el.classList.remove('show'));
+        if (!wasShown) {
+          menu.classList.add('show');
+        }
+      }
+    </script>
+  </body>
+</html>

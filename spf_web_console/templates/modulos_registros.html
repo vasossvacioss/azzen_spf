@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ modulo_nombre }} · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/style.css?v=20261025_11" />
+    <style>
+      .modulo-container {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      
+      .modulo-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #ff6b35;
+        padding-bottom: 15px;
+      }
+      
+      .modulo-header h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #333;
+      }
+      
+      .modulo-description {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+      }
+      
+      .vistas-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      
+      .vista-tab {
+        padding: 10px 20px;
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #333;
+        display: inline-block;
+      }
+      
+      .vista-tab:hover {
+        background: #e8e8e8;
+        border-color: #ff6b35;
+      }
+      
+      .vista-tab.active {
+        background: #ff6b35;
+        color: white;
+        border-color: #ff6b35;
+      }
+      
+      .vista-contenido {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .registros-lista {
+        display: grid;
+        gap: 15px;
+      }
+      
+      .registro-item {
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        padding: 15px;
+        transition: all 0.3s ease;
+      }
+      
+      .registro-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-color: #ff6b35;
+      }
+      
+      .registro-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      
+      .registro-titulo {
+        font-weight: bold;
+        color: #333;
+        font-size: 16px;
+      }
+      
+      .registro-detalles {
+        font-size: 13px;
+        color: #666;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+      }
+      
+      .registro-detalle-item {
+        display: flex;
+        gap: 5px;
+      }
+      
+      .registro-detalle-label {
+        font-weight: bold;
+        color: #ff6b35;
+      }
+      
+      .btn-crear-registro {
+        background: #ff6b35;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+      }
+      
+      .btn-crear-registro:hover {
+        background: #e05a2a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(255,107,53,0.3);
+      }
+      
+      .formulario-crear {
+        background: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        padding: 20px;
+      }
+      
+      .form-group {
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .form-group label {
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+        font-size: 14px;
+      }
+      
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 14px;
+      }
+      
+      .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+      
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #ff6b35;
+        box-shadow: 0 0 5px rgba(255,107,53,0.3);
+      }
+      
+      .form-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      
+      .btn-primary {
+        background: #ff6b35;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .btn-primary:hover {
+        background: #e05a2a;
+      }
+      
+      .btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+        padding: 10px 20px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .btn-secondary:hover {
+        background: #e8e8e8;
+      }
+      
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      
+      .badge-success {
+        background: #4caf50;
+        color: white;
+      }
+      
+      .badge-warning {
+        background: #ff9800;
+        color: white;
+      }
+      
+      .badge-danger {
+        background: #f44336;
+        color: white;
+      }
+      
+      .badge-info {
+        background: #2196f3;
+        color: white;
+      }
+      
+      .pagination {
+        display: flex;
+        gap: 5px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      
+      .pagination a, .pagination span {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #333;
+      }
+      
+      .pagination a:hover {
+        background: #f0f0f0;
+      }
+      
+      .pagination .active {
+        background: #ff6b35;
+        color: white;
+        border-color: #ff6b35;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones... (Presione '/' para buscar)" autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+
+      <div class="navbar-notif" id="navbar-notif-container">
+        <button type="button" id="btn-notificaciones" class="btn-notif" onclick="toggleNotifDropdown(event)" title="Notificaciones del Sistema">
+          <span class="bell-icon">🔔</span>
+          <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+        </button>
+      </div>
+
+      <div class="user-menu">
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestion de Actuaciones y Suspensiones</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestion de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Modulos de Registros</div>
+          {% for modulo in modulos %}
+          <details class="nav-group" {% if modulo.nombre_modulo == modulo_nombre %}open{% endif %}>
+            <summary class="nav-group-summary">
+              <span>{{ modulo.icono }}</span>
+              <span>{{ modulo.nombre_modulo }}</span>
+            </summary>
+            <div class="subnav">
+              {% for vista in modulo.vistas %}
+              <a href="/modulos/{{ modulo.id }}/vista/{{ vista.id }}"
+                 {% if vista.nombre_vista == vista_nombre %}class="active"{% endif %}>
+                {{ vista.nombre_vista }}
+              </a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Busqueda global
+          </a>
+          <a href="/personas" class="nav-item">
+            <span>👥</span> Personas
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="modulo-container">
+          <div class="modulo-header">
+            <div>
+              <h1>{{ modulo_nombre }}</h1>
+              <div class="modulo-description">{{ modulo_descripcion }}</div>
+            </div>
+          </div>
+
+          <div class="vistas-tabs">
+            {% for vista in vistas_disponibles %}
+            <a href="/modulos/{{ modulo_id }}/vista/{{ vista.id }}"
+               class="vista-tab {% if vista.nombre_vista == vista_nombre %}active{% endif %}">
+              {{ vista.nombre_vista }}
+            </a>
+            {% endfor %}
+          </div>
+
+          <div class="vista-contenido">
+            {% if vista_tipo == "lista" %}
+              <!-- VISTA LISTA -->
+              <div class="registros-lista">
+                {% if registros %}
+                  {% for registro in registros %}
+                  <div class="registro-item">
+                    <div class="registro-header">
+                      <div class="registro-titulo">
+                        {{ registro.titulo }}
+                      </div>
+                      <div>
+                        <a href="/modulos/{{ modulo_id }}/ver/{{ registro.id }}" style="margin-right: 10px;">Ver</a>
+                        <a href="/modulos/{{ modulo_id }}/editar/{{ registro.id }}" style="margin-right: 10px;">Editar</a>
+                        <a href="/modulos/{{ modulo_id }}/eliminar/{{ registro.id }}" onclick="return confirm('Confirmar eliminacion?');">Eliminar</a>
+                      </div>
+                    </div>
+                    <div class="registro-detalles">
+                      {% for key, value in registro.detalles %}
+                      <div class="registro-detalle-item">
+                        <span class="registro-detalle-label">{{ key }}:</span>
+                        <span>{{ value }}</span>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  <div style="text-align: center; padding: 40px; color: #999;">
+                    <p>No hay registros disponibles</p>
+                  </div>
+                {% endif %}
+              </div>
+              
+              {% if pagination %}
+              <div class="pagination">
+                {% if pagination.prev_page %}
+                  <a href="/modulos/{{ modulo_id }}/vista/{{ vista_id }}?page={{ pagination.prev_page }}">Anterior</a>
+                {% endif %}
+                
+                {% for page in pagination.pages %}
+                  {% if page == pagination.current_page %}
+                    <span class="active">{{ page }}</span>
+                  {% else %}
+                    <a href="/modulos/{{ modulo_id }}/vista/{{ vista_id }}?page={{ page }}">{{ page }}</a>
+                  {% endif %}
+                {% endfor %}
+                
+                {% if pagination.next_page %}
+                  <a href="/modulos/{{ modulo_id }}/vista/{{ vista_id }}?page={{ pagination.next_page }}">Siguiente</a>
+                {% endif %}
+              </div>
+              {% endif %}
+
+            {% else if vista_tipo == "crear" %}
+              <!-- VISTA CREAR -->
+              <button class="btn-crear-registro" onclick="toggleFormulario()">+ Crear nuevo registro</button>
+              
+              <div id="formulario-crear" class="formulario-crear" style="display: none;">
+                <h3>Nuevo {{ modulo_nombre | lower }}</h3>
+                <form method="POST" action="/modulos/{{ modulo_id }}/vista/{{ vista_id }}/crear">
+                  {% for campo in campos_formulario %}
+                  <div class="form-group">
+                    <label for="{{ campo.nombre }}">{{ campo.etiqueta }}</label>
+                    {% if campo.tipo == "texto" %}
+                      <input type="text" id="{{ campo.nombre }}" name="{{ campo.nombre }}" {% if campo.requerido %}required{% endif %} />
+                    {% else if campo.tipo == "numero" %}
+                      <input type="number" id="{{ campo.nombre }}" name="{{ campo.nombre }}" {% if campo.requerido %}required{% endif %} />
+                    {% else if campo.tipo == "fecha" %}
+                      <input type="date" id="{{ campo.nombre }}" name="{{ campo.nombre }}" {% if campo.requerido %}required{% endif %} />
+                    {% else if campo.tipo == "select" %}
+                      <select id="{{ campo.nombre }}" name="{{ campo.nombre }}" {% if campo.requerido %}required{% endif %}>
+                        <option value="">-- Seleccione --</option>
+                        {% for opcion in campo.opciones %}
+                        <option value="{{ opcion }}">{{ opcion }}</option>
+                        {% endfor %}
+                      </select>
+                    {% else if campo.tipo == "textarea" %}
+                      <textarea id="{{ campo.nombre }}" name="{{ campo.nombre }}" {% if campo.requerido %}required{% endif %}></textarea>
+                    {% endif %}
+                  </div>
+                  {% endfor %}
+                  
+                  <div class="form-buttons">
+                    <button type="submit" class="btn-primary">Crear registro</button>
+                    <button type="button" class="btn-secondary" onclick="toggleFormulario()">Cancelar</button>
+                  </div>
+                </form>
+              </div>
+
+            {% else if vista_tipo == "historial" %}
+              <!-- VISTA HISTORIAL -->
+              <div style="margin-bottom: 20px;">
+                <input type="text" id="filtro-fecha" placeholder="Filtrar por fecha (YYYY-MM-DD)" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px;" />
+                <button onclick="filtrarHistorial()" style="padding: 8px 20px; background: #ff6b35; color: white; border: none; border-radius: 4px; cursor: pointer;">Filtrar</button>
+              </div>
+              
+              <div class="registros-lista">
+                {% if historial %}
+                  {% for item in historial %}
+                  <div class="registro-item">
+                    <div class="registro-header">
+                      <div class="registro-titulo">
+                        {{ item.titulo }}
+                        <span class="badge badge-info">{{ item.tipo_cambio }}</span>
+                      </div>
+                      <div style="font-size: 12px; color: #999;">
+                        {{ item.fecha_cambio }}
+                      </div>
+                    </div>
+                    <div class="registro-detalles">
+                      <div class="registro-detalle-item">
+                        <span class="registro-detalle-label">Usuario:</span>
+                        <span>{{ item.usuario_cambio }}</span>
+                      </div>
+                      {% if item.descripcion %}
+                      <div class="registro-detalle-item">
+                        <span class="registro-detalle-label">Cambio:</span>
+                        <span>{{ item.descripcion }}</span>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  <div style="text-align: center; padding: 40px; color: #999;">
+                    <p>No hay historial disponible</p>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      function toggleFormulario() {
+        const formulario = document.getElementById('formulario-crear');
+        if (formulario.style.display === 'none') {
+          formulario.style.display = 'block';
+        } else {
+          formulario.style.display = 'none';
+        }
+      }
+      
+      function filtrarHistorial() {
+        const fecha = document.getElementById('filtro-fecha').value;
+        if (fecha) {
+          window.location.href = `/modulos/{{ modulo_id }}/vista/{{ vista_id }}?fecha=${fecha}`;
+        }
+      }
+    </script>
+  </body>
+</html>

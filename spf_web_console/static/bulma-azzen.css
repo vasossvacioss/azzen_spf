@@ -1,0 +1,518 @@
+/* ==============================================================================
+   AZZEN SPF — ADAPTACIÓN INSTITUCIONAL DE BULMA CSS
+   Paleta: Yaru / Ubuntu Linux Desktop Edition
+   Acento Principal: Naranja Ubuntu #E95420 · Fondos Claros #FFFFFF / #F8F9FA
+   Sin degradados · Contraste administrativo · Tipografía Ubuntu
+   ============================================================================== */
+
+/* Tipografía base de Bulma adaptada a Ubuntu */
+body, button, input, select, textarea {
+  font-family: 'Ubuntu', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+code, pre, .is-family-code {
+  font-family: 'Ubuntu Mono', monospace !important;
+}
+
+/* --------------------------------------------------------------------------
+   1. BOTONES (.button)
+   -------------------------------------------------------------------------- */
+.button {
+  font-weight: 600;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  font-size: 13.5px;
+}
+
+.button.is-primary {
+  background-color: #E95420 !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+}
+
+.button.is-primary:hover,
+.button.is-primary.is-hovered {
+  background-color: #C7461B !important;
+  color: #FFFFFF !important;
+}
+
+.button.is-primary:active,
+.button.is-primary.is-active {
+  background-color: #A83610 !important;
+  color: #FFFFFF !important;
+}
+
+.button.is-primary:focus,
+.button.is-primary.is-focused {
+  box-shadow: 0 0 0 3px rgba(233, 84, 32, 0.25) !important;
+}
+
+.button.is-link {
+  color: #E95420 !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.button.is-link:hover {
+  color: #C7461B !important;
+  text-decoration: underline !important;
+}
+
+.button.is-success {
+  background-color: #27AE60 !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+}
+
+.button.is-success:hover {
+  background-color: #219653 !important;
+}
+
+.button.is-danger {
+  background-color: #E74C3C !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+}
+
+.button.is-danger:hover {
+  background-color: #C0392B !important;
+}
+
+.button.is-warning {
+  background-color: #F39C12 !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+}
+
+.button.is-warning:hover {
+  background-color: #D68910 !important;
+}
+
+.button.is-info {
+  background-color: #3498DB !important;
+  border-color: transparent !important;
+  color: #FFFFFF !important;
+}
+
+.button.is-light {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  color: #334155 !important;
+}
+
+.button.is-light:hover {
+  background-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. TABLAS ADMINISTRATIVAS (.table)
+   -------------------------------------------------------------------------- */
+.table {
+  background-color: #FFFFFF;
+  color: #1E293B;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table thead th {
+  background-color: #F8F9FA !important;
+  color: #475569 !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border-bottom: 2px solid #E2E8F0 !important;
+  padding: 10px 14px !important;
+  vertical-align: middle !important;
+}
+
+.table tbody td {
+  border-bottom: 1px solid #E2E8F0 !important;
+  padding: 10px 14px !important;
+  vertical-align: middle !important;
+  font-size: 13px !important;
+  color: #334155;
+}
+
+.table tbody tr:hover {
+  background-color: #FEF5EC !important; /* Resalte sutil naranja AZZEN */
+}
+
+.table.is-narrow thead th,
+.table.is-narrow tbody td {
+  padding: 7px 10px !important;
+}
+
+.table.is-striped tbody tr:not(.is-selected):nth-child(even) {
+  background-color: #FBFBFC;
+}
+
+/* --------------------------------------------------------------------------
+   3. FORMULARIOS, CAMPOS Y SELECTORES (.input, .select, .textarea)
+   -------------------------------------------------------------------------- */
+.input, .textarea, .select select {
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  color: #0F172A;
+  box-shadow: none;
+  font-size: 13.5px;
+  padding: 8px 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:focus, .textarea:focus, .select select:focus,
+.input.is-focused, .textarea.is-focused, .select select.is-focused {
+  border-color: #E95420 !important;
+  box-shadow: 0 0 0 3px rgba(233, 84, 32, 0.20) !important;
+  outline: none !important;
+}
+
+.label {
+  color: #1E293B;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.help {
+  font-size: 11.5px;
+  margin-top: 4px;
+}
+
+.help.is-danger {
+  color: #DC2626 !important;
+}
+
+.help.is-success {
+  color: #16A34A !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. ETIQUETAS DE ESTADO (.tag, .tags)
+   -------------------------------------------------------------------------- */
+.tag {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.2px;
+  height: auto;
+}
+
+.tag.is-primary {
+  background-color: rgba(233, 84, 32, 0.12) !important;
+  color: #C7461B !important;
+  border: 1px solid #FED7AA !important;
+}
+
+.tag.is-success {
+  background-color: #DCFCE7 !important;
+  color: #166534 !important;
+  border: 1px solid #BBF7D0 !important;
+}
+
+.tag.is-danger {
+  background-color: #FEE2E2 !important;
+  color: #991B1B !important;
+  border: 1px solid #FECACA !important;
+}
+
+.tag.is-warning {
+  background-color: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 1px solid #FDE68A !important;
+}
+
+.tag.is-info {
+  background-color: #DBEAFE !important;
+  color: #1E40AF !important;
+  border: 1px solid #BFDBFE !important;
+}
+
+.tag.is-light {
+  background-color: #F1F5F9 !important;
+  color: #475569 !important;
+  border: 1px solid #E2E8F0 !important;
+}
+
+/* --------------------------------------------------------------------------
+   5. PESTAÑAS DE NAVEGACIÓN (.tabs)
+   -------------------------------------------------------------------------- */
+.tabs {
+  margin-bottom: 20px;
+}
+
+.tabs ul {
+  border-bottom: 2px solid #E2E8F0;
+}
+
+.tabs a {
+  color: #64748B;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  padding: 10px 18px;
+  transition: all 0.15s ease;
+  font-size: 13.5px;
+}
+
+.tabs a:hover {
+  color: #E95420;
+  border-bottom-color: #FED7AA;
+}
+
+.tabs li.is-active a {
+  color: #E95420 !important;
+  border-bottom-color: #E95420 !important;
+  font-weight: 700 !important;
+}
+
+.tabs.is-boxed li.is-active a {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 #E2E8F0 transparent !important;
+  border-top: 3px solid #E95420 !important;
+}
+
+/* --------------------------------------------------------------------------
+   6. MENSAJES Y NOTIFICACIONES (.notification)
+   -------------------------------------------------------------------------- */
+.notification {
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.notification.is-primary {
+  background-color: #FFF7ED !important;
+  border-color: #FED7AA !important;
+  color: #9A3412 !important;
+}
+
+.notification.is-success {
+  background-color: #F0FDF4 !important;
+  border-color: #BBF7D0 !important;
+  color: #166534 !important;
+}
+
+.notification.is-danger {
+  background-color: #FEF2F2 !important;
+  border-color: #FECACA !important;
+  color: #991B1B !important;
+}
+
+.notification.is-warning {
+  background-color: #FFFBEB !important;
+  border-color: #FDE68A !important;
+  color: #92400E !important;
+}
+
+.notification.is-info {
+  background-color: #EFF6FF !important;
+  border-color: #BFDBFE !important;
+  color: #1E40AF !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. VENTANAS MODALES (.modal)
+   -------------------------------------------------------------------------- */
+.modal-card {
+  border-radius: 10px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 580px;
+  width: 95%;
+}
+
+.modal-card-head {
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 14px 20px;
+}
+
+.modal-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.modal-card-body {
+  background-color: #FFFFFF;
+  padding: 20px;
+  color: #334155;
+  font-size: 13.5px;
+}
+
+.modal-card-foot {
+  background-color: #F8F9FA;
+  border-top: 1px solid #E2E8F0;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   8. PANELES Y TARJETAS (.card, .panel)
+   -------------------------------------------------------------------------- */
+.card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E2E8F0;
+  box-shadow: none;
+}
+
+.card-header-title {
+  color: #0F172A;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 16px;
+}
+
+.card-content {
+  padding: 18px 20px;
+}
+
+.panel {
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.panel-heading {
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E2E8F0;
+  color: #0F172A;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 16px;
+}
+
+.panel-block {
+  border-bottom: 1px solid #F1F5F9;
+  padding: 10px 16px;
+  color: #334155;
+}
+
+/* --------------------------------------------------------------------------
+   9. PUENTE DE COMPATIBILIDAD CON CLASES AZZEN SPF (.btn, .form-control, etc.)
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Ubuntu', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.5;
+  padding: 7px 14px !important;
+  border-radius: 6px !important;
+  border: 1px solid transparent !important;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none !important;
+}
+
+.btn.btn-primary {
+  background-color: #E95420 !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+}
+
+.btn.btn-primary:hover {
+  background-color: #C7461B !important;
+  color: #FFFFFF !important;
+}
+
+.btn.btn-secondary {
+  background-color: #F1F5F9 !important;
+  color: #334155 !important;
+  border: 1px solid #CBD5E1 !important;
+}
+
+.btn.btn-secondary:hover {
+  background-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+
+.btn.btn-sm {
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  border-radius: 4px !important;
+}
+
+/* Form Controls */
+.form-control {
+  width: 100%;
+  padding: 7px 12px;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: #0F172A;
+  background: #FFFFFF;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus {
+  outline: none !important;
+  border-color: #E95420 !important;
+  box-shadow: 0 0 0 3px rgba(233, 84, 32, 0.20) !important;
+}
+
+/* Tablas Administrativas Densas */
+.sec-table {
+  width: 100%;
+  background-color: #FFFFFF;
+  border-collapse: collapse;
+}
+
+.sec-table th {
+  background-color: #F8F9FA !important;
+  color: #475569 !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border-bottom: 2px solid #E2E8F0 !important;
+  padding: 10px 14px !important;
+}
+
+.sec-table td {
+  border-bottom: 1px solid #E2E8F0 !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+  color: #334155 !important;
+  vertical-align: middle !important;
+}
+
+.sec-table tr:hover td {
+  background-color: #FEF5EC !important;
+}
+
+/* Tarjetas de Estadísticas KPI */
+.sec-stat-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 8px !important;
+  padding: 16px 18px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sec-stat-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07) !important;
+}
+

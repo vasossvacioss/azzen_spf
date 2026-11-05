@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Padrón de Personas · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/style.css?v=20261025_11" />
+  </head>
+  <body>
+        <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <div class="notif-wrapper" style="position:relative;">
+          <button id="notif-bell-btn" class="notif-bell-btn" type="button" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
+            🔔
+            <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+            <div class="notif-dropdown-header">
+              <span style="font-weight:700;">Notificaciones</span>
+              <a href="javascript:void(0)" onclick="marcarTodasLeidas()" style="font-size:12px; color:var(--azzen-orange);">Marcar leídas</a>
+            </div>
+            <div id="notif-items-list" class="notif-items-list">
+              <div class="notif-empty">Cargando...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="/notificaciones">Ver todas las notificaciones →</a>
+            </div>
+          </div>
+        </div>
+
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+            <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+          <a href="/notificaciones" class="nav-item">
+            <span>🔔</span> Notificaciones
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          {% for f in nav_files %}
+          <details>
+            <summary>📊 {{ f.file_name }}</summary>
+            <div class="subnav">
+              {% for s in f.sheets %}
+              <a href="/fuente/{{ f.file_id }}/hoja/{{ s.sheet_id }}">{{ s.sheet_name }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Búsqueda global
+          </a>
+          <a href="/personas" class="nav-item active">
+            <span>👥</span> Personas
+          </a>
+          <a href="/staging" class="nav-item">
+            <span>⚠️</span> Staging sin credencial
+          </a>
+          <a href="/modulos" class="nav-item">
+            <span>📦</span> Catálogo de Módulos
+          </a>
+          <a href="/modulos/dashboard" class="nav-item">
+            <span>📊</span> Dashboard Estadístico
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Auditoría y Sistema</div>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🧹</span> Calidad de Datos
+          </a>
+          <a href="/administracion/versiones" class="nav-item">
+            <span>📜</span> Control de versiones
+          </a>
+          <a href="/seguridad" class="nav-item">
+            <span>🛡️</span> Centro de Seguridad
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li class="is-active"><a href="/personas">Personas</a></li>
+          </ul>
+        </div>
+
+        <div class="mc-header-bar">
+          <div>
+            <h1 class="mc-header-title">
+              <span>👥</span>
+              <span>Padrón Unificado de Personas</span>
+            </h1>
+            <p class="mc-header-subtitle">
+              Listado consolidado de agentes y personal registrado en las bases del Servicio Penitenciario Federal.
+            </p>
+          </div>
+          <div class="mc-header-actions">
+            <a href="/export/personas.csv?q={{ q }}&estado_disciplinario={{ estado_disciplinario }}&origen={{ origen }}" class="button is-dark is-outlined btn-sm">Descargar CSV</a>
+            <a href="/export/personas.xlsx?q={{ q }}&estado_disciplinario={{ estado_disciplinario }}&origen={{ origen }}" class="button is-dark is-outlined btn-sm">Descargar XLSX</a>
+          </div>
+        </div>
+
+        <form method="get" class="filters" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:#fff; padding:14px 16px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:16px;">
+          <input name="q" placeholder="Buscar por credencial, apellido, nombre o escalafón/grado..." value="{{ q }}" style="min-width:240px; flex:1;" />
+          
+          <select name="estado_disciplinario" style="min-width:190px;">
+            <option value="todos" {% if estado_disciplinario == "todos" || estado_disciplinario == "" %}selected{% endif %}>Todos los estados</option>
+            <option value="suspension_activa" {% if estado_disciplinario == "suspension_activa" %}selected{% endif %}>⚠️ Suspensión Activa</option>
+            <option value="sumario_abierto" {% if estado_disciplinario == "sumario_abierto" %}selected{% endif %}>⚖️ Sumario Abierto</option>
+            <option value="suspension_levantada" {% if estado_disciplinario == "suspension_levantada" %}selected{% endif %}>🛡️ Suspensión Levantada</option>
+            <option value="impedimento_judicial" {% if estado_disciplinario == "impedimento_judicial" %}selected{% endif %}>⚖️ Impedimento Judicial</option>
+            <option value="sin_sanciones" {% if estado_disciplinario == "sin_sanciones" %}selected{% endif %}>✓ Sin medidas activas</option>
+          </select>
+
+          <select name="origen" style="min-width:160px;">
+            <option value="todos" {% if origen == "todos" || origen == "" %}selected{% endif %}>Todos los orígenes</option>
+            <option value="sumarios_caratulas" {% if origen == "sumarios_caratulas" %}selected{% endif %}>Sumarios / Carátulas</option>
+            <option value="suspensiones" {% if origen == "suspensiones" %}selected{% endif %}>Suspensiones</option>
+            <option value="inasistencias" {% if origen == "inasistencias" %}selected{% endif %}>Inasistencias</option>
+            <option value="juridico_impedimentos" {% if origen == "juridico_impedimentos" %}selected{% endif %}>Impedimentos</option>
+            <option value="personas_padron" {% if origen == "personas_padron" %}selected{% endif %}>Padrón Central</option>
+          </select>
+
+          <select name="order" style="min-width:150px;">
+            <option value="credencial" {% if order == "credencial" %}selected{% endif %}>Ordenar: Credencial</option>
+            <option value="apellido" {% if order == "apellido" %}selected{% endif %}>Ordenar: Apellido</option>
+            <option value="nombre" {% if order == "nombre" %}selected{% endif %}>Ordenar: Nombre</option>
+            <option value="escalafon_grado" {% if order == "escalafon_grado" %}selected{% endif %}>Ordenar: Escalafón/Grado</option>
+            <option value="origen_principal" {% if order == "origen_principal" %}selected{% endif %}>Ordenar: Origen</option>
+            <option value="last_seen_at" {% if order == "last_seen_at" %}selected{% endif %}>Ordenar: Último visto</option>
+          </select>
+
+          <select name="dir" style="min-width:105px;">
+            <option value="asc" {% if dir == "asc" %}selected{% endif %}>Ascendente</option>
+            <option value="desc" {% if dir == "desc" %}selected{% endif %}>Descendente</option>
+          </select>
+
+          <select name="size" style="min-width:115px;" onchange="this.form.submit()">
+            <option value="5" {% if size == 5 %}selected{% endif %}>5 por pág.</option>
+            <option value="10" {% if size == 10 %}selected{% endif %}>10 por pág.</option>
+            <option value="20" {% if size == 20 %}selected{% endif %}>20 por pág.</option>
+            <option value="50" {% if size == 50 %}selected{% endif %}>50 por pág.</option>
+          </select>
+
+          <button type="submit" class="btn-primary">Filtrar</button>
+          <a href="/personas" class="btn-secondary">Limpiar</a>
+        </form>
+
+        <p class="muted" style="margin-bottom:12px;">Total de personas: <strong>{{ total_rows }}</strong> · página {{ page }} de {{ total_pages }}</p>
+
+        <div class="table-wrap">
+          <table class="mc-table">
+            <thead>
+              <tr>
+                <th style="width:105px;">Credencial</th>
+                <th>Apellido</th>
+                <th>Nombre</th>
+                <th>Escalafón / Grado</th>
+                <th style="width:150px; text-align:center;">Estado Disciplinario</th>
+                <th style="width:135px;">Módulo / Origen</th>
+                <th style="width:150px;">Última actualización</th>
+                <th style="width:140px; text-align:center;">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+              <tr data-origen-tipo="persona" data-credencial="{{ row.credencial }}" data-nombre="{% if let Some(ap) = row.apellido %}{{ ap }}{% if let Some(nom) = row.nombre %}, {{ nom }}{% endif %}{% else %}{{ row.nombre_apellido.as_deref().unwrap_or("Sin datos") }}{% endif %}">
+                <td class="cell-nowrap">
+                  <span style="font-weight:700; color:var(--azzen-orange); font-family:'Ubuntu Mono',monospace; font-size:14px;">{{ row.credencial }}</span>
+                </td>
+                <td style="font-weight:700; color:var(--azzen-dark);">
+                  <span class="cell-truncate-md" title="{{ row.apellido.as_deref().unwrap_or("-") }}">
+                    {{ row.apellido.as_deref().unwrap_or("-") }}
+                  </span>
+                </td>
+                <td style="font-weight:500; color:var(--azzen-dark);">
+                  <span class="cell-truncate-md" title="{{ row.nombre.as_deref().unwrap_or("-") }}">
+                    {{ row.nombre.as_deref().unwrap_or("-") }}
+                  </span>
+                </td>
+                <td>
+                  {% if let Some(esc) = row.escalafon_grado %}
+                  <span class="mc-badge" style="background:#e0f2fe; color:#0369a1; font-weight:600; font-size:12px; border:1px solid #bae6fd;" title="{{ esc }}">
+                    {{ esc }}
+                  </span>
+                  {% else %}
+                  <span class="muted" style="font-size:12px;">-</span>
+                  {% endif %}
+                </td>
+                <td style="text-align:center; white-space:nowrap;">
+                  {% if row.tiene_suspension_activa %}
+                  <span class="badge badge-danger" title="Suspensión preventiva vigente">⚠️ Suspensión Activa</span>
+                  {% else if row.tiene_sumario_abierto %}
+                  <span class="badge badge-warning" title="Sumario administrativo en trámite">⚖️ Sumario Abierto</span>
+                  {% else if row.tiene_impedimento_judicial %}
+                  <span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #d8b4fe; font-weight:600;" title="Condena o procesamiento estatutario">⚖️ Impedimento Judicial</span>
+                  {% else %}
+                  <span class="badge badge-success" title="Sin medidas cautelares activas">✓ Sin medidas activas</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="mc-badge estado-entregado">{{ row.origen_principal.as_deref().unwrap_or("Sin datos") }}</span>
+                </td>
+                <td class="muted cell-nowrap" style="font-size:12px;">{{ row.last_seen_at }}</td>
+                <td style="text-align:center; white-space:nowrap;">
+                  <div style="display:inline-flex; align-items:center; gap:6px;">
+                    <button type="button" class="btn-investigar" onclick="openInvestigarSheetRowModal(this)" title="Investigar datos de la fila">
+                      <span>🔍</span> Investigar
+                    </button>
+                    <button type="button" class="btn-editar-fila" onclick="openEditarFilaNovedadModal(this)" title="Editar / Agregar novedad sobre este agente">
+                      <span>✏️</span>
+                    </button>
+                    <a href="/agentes/{{ row.credencial }}/historial" class="button is-dark is-outlined btn-sm" style="font-size:11.5px; padding:3px 9px;" title="Ver Ficha Técnica y Legajo del Agente">
+                      📋 Ficha / Legajo ↗
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+            {% if rows.is_empty() %}
+            <tr>
+              <td colspan="8" style="text-align:center; padding:32px; color:#64748b;">
+                No se encontraron personas con los criterios indicados.
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+
+        <div class="pager" style="margin-top:20px;">
+          {% if page > 1 %}
+          <a href="/personas?q={{ q }}&estado_disciplinario={{ estado_disciplinario }}&origen={{ origen }}&page={{ page - 1 }}&size={{ size }}&order={{ order }}&dir={{ dir }}">← Anterior</a>
+          {% endif %}
+          {% if page < total_pages %}
+          <a href="/personas?q={{ q }}&estado_disciplinario={{ estado_disciplinario }}&origen={{ origen }}&page={{ page + 1 }}&size={{ size }}&order={{ order }}&dir={{ dir }}">Siguiente →</a>
+          {% endif %}
+        </div>
+      </main>
+    </div>
+    <script src="/static/azzen.js?v=20261025_11"></script>
+  </body>
+</html>

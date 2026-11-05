@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Catálogo de Módulos de Registros · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/style.css?v=20261025_11" />
+    <style>
+      .modulos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .modulo-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 22px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      }
+      .modulo-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08);
+        border-color: #cbd5e1;
+      }
+      .modulo-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .modulo-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+      }
+      .modulo-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+      }
+      .modulo-desc {
+        font-size: 13.5px;
+        color: #64748b;
+        line-height: 1.45;
+        margin-bottom: 18px;
+        flex-grow: 1;
+      }
+      .modulo-footer {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .order-pill {
+        font-size: 11px;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    </style>
+  </head>
+  <body>
+        <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <div class="notif-wrapper" style="position:relative;">
+          <button id="notif-bell-btn" class="notif-bell-btn" type="button" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
+            🔔
+            <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+            <div class="notif-dropdown-header">
+              <span style="font-weight:700;">Notificaciones</span>
+              <a href="javascript:void(0)" onclick="marcarTodasLeidas()" style="font-size:12px; color:var(--azzen-orange);">Marcar leídas</a>
+            </div>
+            <div id="notif-items-list" class="notif-items-list">
+              <div class="notif-empty">Cargando...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="/notificaciones">Ver todas las notificaciones →</a>
+            </div>
+          </div>
+        </div>
+
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+            <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+          <a href="/notificaciones" class="nav-item">
+            <span>🔔</span> Notificaciones
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          {% for f in nav_files %}
+          <details>
+            <summary>📊 {{ f.file_name }}</summary>
+            <div class="subnav">
+              {% for s in f.sheets %}
+              <a href="/fuente/{{ f.file_id }}/hoja/{{ s.sheet_id }}">{{ s.sheet_name }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Búsqueda global
+          </a>
+          <a href="/personas" class="nav-item">
+            <span>👥</span> Personas
+          </a>
+          <a href="/staging" class="nav-item">
+            <span>⚠️</span> Staging sin credencial
+          </a>
+          <a href="/modulos" class="nav-item active">
+            <span>📦</span> Catálogo de Módulos
+          </a>
+          <a href="/modulos/dashboard" class="nav-item">
+            <span>📊</span> Dashboard Estadístico
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Auditoría y Sistema</div>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🧹</span> Calidad de Datos
+          </a>
+          <a href="/administracion/versiones" class="nav-item">
+            <span>📜</span> Control de versiones
+          </a>
+          <a href="/seguridad" class="nav-item">
+            <span>🛡️</span> Centro de Seguridad
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li class="is-active"><a href="/modulos">Módulos</a></li>
+          </ul>
+        </div>
+
+        <div class="mc-header-bar">
+          <div>
+            <h1 class="mc-header-title">
+              <span>📦</span>
+              <span>Catálogo de Módulos de Registros</span>
+            </h1>
+            <p class="mc-header-subtitle">
+              Estructura centralizada de módulos de gestión, expedientes, personal, medidas cautelares y actuaciones del SPF.
+            </p>
+          </div>
+          <div class="mc-header-actions">
+            <a href="/modulos/dashboard" class="button is-dark is-outlined btn-sm" style="font-size:12.5px;">
+              📊 Ver Dashboard de Módulos
+            </a>
+          </div>
+        </div>
+
+        <div class="meta-summary-bar" style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:12px 18px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:20px;">ℹ️</span>
+            <div>
+              <div style="font-weight:700; color:#1e293b; font-size:14px;">Módulos del Sistema Operativos</div>
+              <div class="muted" style="font-size:12px;">{{ total_modulos }} módulos activos sincronizados con la base de datos central.</div>
+            </div>
+          </div>
+          <div>
+            <span class="badge badge-success" style="font-size:12px;">✓ Entorno Operativo</span>
+          </div>
+        </div>
+
+        <!-- GRILLA DE MÓDULOS -->
+        <div class="modulos-grid">
+          {% for m in modulos %}
+          <div class="modulo-card">
+            <div>
+              <div class="modulo-card-header">
+                <div class="modulo-icon-box">
+                  {{ m.icono.as_deref().unwrap_or("📄") }}
+                </div>
+                <span class="badge badge-success" style="font-size:11px;">Activo</span>
+              </div>
+              <h2 class="modulo-title">{{ m.nombre_modulo }}</h2>
+              <p class="modulo-desc">
+                {{ m.descripcion.as_deref().unwrap_or("Sin descripción informada") }}
+              </p>
+            </div>
+
+            <div class="modulo-footer">
+              <span class="order-pill">Módulo #{{ m.orden }}</span>
+              <div style="display:flex; gap:8px;">
+                <a href="{{ m.url_destino }}" class="button is-dark btn-sm" style="background:#e95420; border-color:#e95420; color:#fff; font-size:12px; padding:3px 12px; font-weight:600; text-decoration:none;">
+                  Abrir ↗
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </main>
+    </div>
+
+    <script src="/static/azzen.js?v=20261025_11"></script>
+  </body>
+</html>
+

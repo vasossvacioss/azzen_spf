@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ficha Técnica de Legajo · {{ credencial }} · {{ nombre_completo }} · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/style.css?v=20261025_11" />
+    <style>
+      .cv-profile-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      }
+      .cv-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+      .cv-field {
+        background: #f8fafc;
+        border: 1px solid #edf2f7;
+        border-radius: 6px;
+        padding: 10px 14px;
+      }
+      .cv-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .cv-value {
+        font-size: 14px;
+        color: #0f172a;
+        font-weight: 600;
+      }
+      .badge-purple {
+        background: #f3e8ff;
+        color: #7e22ce;
+        border: 1px solid #d8b4fe;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 10mm 8mm;
+      }
+      @media print {
+        body {
+          background: #fff !important;
+          color: #000 !important;
+          font-size: 8.5pt !important;
+          line-height: 1.3 !important;
+        }
+        .topbar, .sidebar, .mc-header-actions, .breadcrumb, #navbar-search-container, .user-menu, .btn-logout, .pager, .col-accion, .no-print {
+          display: none !important;
+        }
+        .layout {
+          display: block !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .content {
+          margin: 0 !important;
+          padding: 0 !important;
+          max-width: 100% !important;
+          width: 100% !important;
+        }
+        .meta-summary-bar {
+          border: 1px solid #94a3b8 !important;
+          box-shadow: none !important;
+          margin-bottom: 12px !important;
+          page-break-inside: avoid;
+          padding: 6px 12px !important;
+        }
+        .meta-summary-stat .num {
+          font-size: 13px !important;
+        }
+        .meta-summary-stat .lbl {
+          font-size: 8.5px !important;
+        }
+        .form-card, .cv-profile-card {
+          border: 1px solid #cbd5e1 !important;
+          box-shadow: none !important;
+          page-break-inside: avoid;
+          margin-bottom: 14px !important;
+          padding: 10px 12px !important;
+        }
+        .cv-grid {
+          gap: 8px !important;
+          grid-template-columns: repeat(3, 1fr) !important;
+        }
+        .cv-field {
+          padding: 6px 10px !important;
+        }
+        .cv-label {
+          font-size: 8.5px !important;
+          margin-bottom: 2px !important;
+        }
+        .cv-value {
+          font-size: 11px !important;
+        }
+        .table-wrap {
+          overflow: visible !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .mc-table {
+          width: 100% !important;
+          max-width: 100% !important;
+          table-layout: fixed !important;
+          font-size: 7.8pt !important;
+          border-collapse: collapse !important;
+        }
+        .mc-table th, .mc-table td {
+          border: 1px solid #cbd5e1 !important;
+          padding: 4px 5px !important;
+          white-space: normal !important;
+          word-break: break-word !important;
+          overflow-wrap: anywhere !important;
+        }
+        .mc-table th {
+          background: #f1f5f9 !important;
+          color: #0f172a !important;
+          font-weight: 700 !important;
+          font-size: 7.5pt !important;
+        }
+        .cell-truncate-lg, .cell-truncate-md {
+          max-width: none !important;
+          white-space: normal !important;
+          overflow: visible !important;
+          text-overflow: clip !important;
+          word-break: break-word !important;
+          overflow-wrap: anywhere !important;
+          display: block !important;
+        }
+        /* Proporciones de columnas en impresión */
+        .print-th-expte { width: 26% !important; }
+        .print-th-tipo { width: 11% !important; }
+        .print-th-repart { width: 12% !important; }
+        .print-th-rol { width: 11% !important; }
+        .print-th-estado { width: 10% !important; }
+        .print-th-fecha { width: 11% !important; }
+        .print-th-motivo { width: 19% !important; }
+
+        .print-th-susp-exp { width: 25% !important; }
+        .print-th-susp-ini { width: 11% !important; }
+        .print-th-susp-enc { width: 15% !important; }
+        .print-th-susp-est { width: 10% !important; }
+        .print-th-susp-fin { width: 11% !important; }
+        .print-th-susp-mot { width: 28% !important; }
+
+        .print-only-header {
+          display: block !important;
+          margin-bottom: 14px;
+          border-bottom: 2px solid #0f172a;
+          padding-bottom: 8px;
+        }
+        .timeline-item {
+          page-break-inside: avoid;
+        }
+      }
+      @media screen {
+        .print-only-header {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+        <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <div class="notif-wrapper" style="position:relative;">
+          <button id="notif-bell-btn" class="notif-bell-btn" type="button" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
+            🔔
+            <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+            <div class="notif-dropdown-header">
+              <span style="font-weight:700;">Notificaciones</span>
+              <a href="javascript:void(0)" onclick="marcarTodasLeidas()" style="font-size:12px; color:var(--azzen-orange);">Marcar leídas</a>
+            </div>
+            <div id="notif-items-list" class="notif-items-list">
+              <div class="notif-empty">Cargando...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="/notificaciones">Ver todas las notificaciones →</a>
+            </div>
+          </div>
+        </div>
+
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+            <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+          <a href="/notificaciones" class="nav-item">
+            <span>🔔</span> Notificaciones
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          {% for f in nav_files %}
+          <details>
+            <summary>📊 {{ f.file_name }}</summary>
+            <div class="subnav">
+              {% for s in f.sheets %}
+              <a href="/fuente/{{ f.file_id }}/hoja/{{ s.sheet_id }}">{{ s.sheet_name }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Búsqueda global
+          </a>
+          <a href="/personas" class="nav-item active">
+            <span>👥</span> Personas
+          </a>
+          <a href="/staging" class="nav-item">
+            <span>⚠️</span> Staging sin credencial
+          </a>
+          <a href="/modulos" class="nav-item">
+            <span>📦</span> Catálogo de Módulos
+          </a>
+          <a href="/modulos/dashboard" class="nav-item">
+            <span>📊</span> Dashboard Estadístico
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Auditoría y Sistema</div>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🧹</span> Calidad de Datos
+          </a>
+          <a href="/administracion/versiones" class="nav-item">
+            <span>📜</span> Control de versiones
+          </a>
+          <a href="/seguridad" class="nav-item">
+            <span>🛡️</span> Centro de Seguridad
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <!-- Membrete oficial visible solo al imprimir / exportar a PDF -->
+        <div class="print-only-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+              <div style="font-size:18px; font-weight:800; color:#0f172a; text-transform:uppercase;">Servicio Penitenciario Federal</div>
+              <div style="font-size:13px; color:#475569; font-weight:600;">Dirección de Asuntos Jurídicos y Régimen Disciplinario · AZZEN SPF</div>
+            </div>
+            <div style="text-align:right; font-size:11px; color:#64748b;">
+              Fecha de emisión: {{ ultima_actualizacion }}<br />
+              Emitido por: {{ user_name }}
+            </div>
+          </div>
+        </div>
+
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/personas">Personas</a></li>
+            <li class="is-active"><a href="#">Ficha de Legajo · Credencial {{ credencial }}</a></li>
+          </ul>
+        </div>
+
+        <!-- Banner de Perfil / Ficha Técnica -->
+        <div class="mc-header-bar" style="border-left:4px solid var(--azzen-orange);">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <span class="mc-badge estado-en_preparacion" style="font-size:13px; font-family:'Ubuntu Mono',monospace;">CREDENCIAL {{ credencial }}</span>
+              <h1 class="mc-header-title" style="display:inline-flex; font-size:24px; margin:0;">
+                {{ nombre_completo }}
+              </h1>
+              <span class="badge {{ situacion_badge_class }}" style="font-size:12px;">{{ situacion_disciplinaria }}</span>
+            </div>
+            <p class="mc-header-subtitle" style="margin-top:4px;">
+              Ficha Técnica de Legajo, Situación de Revista y Antecedentes Disciplinarios Centralizados.
+            </p>
+          </div>
+          <div class="mc-header-actions" style="display:flex; gap:8px;">
+            <button type="button" class="button is-dark is-outlined btn-sm" onclick="window.print()" title="Imprimir o Guardar Ficha como PDF">
+              <span>📄</span> Descargar Ficha PDF
+            </button>
+            <a href="/agentes/{{ credencial }}/export.xlsx" class="button is-dark is-outlined btn-sm" title="Descargar todos los datos del agente en Excel">
+              <span>📊</span> Descargar Excel (.xlsx)
+            </a>
+            <a href="/personas" class="button is-secondary btn-sm">← Volver al Padrón</a>
+          </div>
+        </div>
+
+        <!-- Barra de Resumen Estadístico (conserva exactamente los chips del diseño) -->
+        <div class="meta-summary-bar">
+          <div class="meta-chip">
+            <span class="meta-chip-label">EXPEDIENTES:</span>
+            <span class="meta-chip-value">{{ total_expedientes }}</span>
+          </div>
+          <div class="meta-chip">
+            <span class="meta-chip-label">SUSPENSIONES:</span>
+            <span class="meta-chip-value">{{ total_suspensiones }}</span>
+          </div>
+          <div class="meta-chip">
+            <span class="meta-chip-label">ESTADO VIGENTE:</span>
+            <span class="meta-chip-value" style="color:{% if suspensiones_activas > 0 %}var(--color-danger){% else %}var(--color-success){% endif %};">
+              {% if suspensiones_activas > 0 %}{{ suspensiones_activas }} vigentes{% else %}Sin suspensión activa{% endif %}
+            </span>
+          </div>
+          <div class="meta-chip">
+            <span class="meta-chip-label">EVENTOS TRAZABILIDAD:</span>
+            <span class="meta-chip-value">{{ total_eventos }}</span>
+          </div>
+          {% if total_impedimentos > 0 %}
+          <div class="meta-chip">
+            <span class="meta-chip-label">IMPEDIMENTOS JUDICIALES:</span>
+            <span class="meta-chip-value" style="color:var(--color-danger);">{{ total_impedimentos }} registrados</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- SECCIÓN 1: FICHA TÉCNICA DE REVISTA Y DATOS PERSONALES (ESTILO LEGAJO / CV) -->
+        <div class="cv-profile-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #edf2f7; padding-bottom:10px;">
+            <h2 style="margin:0; font-size:17px; color:#1e293b; display:flex; align-items:center; gap:8px;">
+              <span>🪪</span> Ficha Técnica de Filiación y Situación de Revista
+            </h2>
+            <span class="muted" style="font-size:12px;">Última actualización: <strong>{{ ultima_actualizacion }}</strong></span>
+          </div>
+
+          <div class="cv-grid">
+            <div class="cv-field">
+              <div class="cv-label">Número de Credencial</div>
+              <div class="cv-value" style="font-family:'Ubuntu Mono',monospace; color:var(--azzen-orange);">{{ credencial }}</div>
+            </div>
+            <div class="cv-field">
+              <div class="cv-label">Apellido y Nombres</div>
+              <div class="cv-value">{{ nombre_completo }}</div>
+            </div>
+            <div class="cv-field">
+              <div class="cv-label">Escalafón / Grado</div>
+              <div class="cv-value">
+                {% if escalafon_grado != "-" && !escalafon_grado.is_empty() %}
+                <span class="mc-badge" style="background:#e0f2fe; color:#0369a1; font-weight:600; font-size:12px; border:1px solid #bae6fd;">{{ escalafon_grado }}</span>
+                {% else %}
+                <span class="muted">-</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="cv-field">
+              <div class="cv-label">Situación Disciplinaria Actual</div>
+              <div class="cv-value">
+                <span class="badge {{ situacion_badge_class }}">{{ situacion_disciplinaria }}</span>
+              </div>
+            </div>
+            <div class="cv-field">
+              <div class="cv-label">Destino / Repartición Habitual</div>
+              <div class="cv-value">{{ ultimo_destino }}</div>
+            </div>
+            <div class="cv-field">
+              <div class="cv-label">Módulo / Origen del Registro</div>
+              <div class="cv-value">
+                <span class="mc-badge estado-entregado">{{ origen_principal }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: EXPEDIENTES Y ACTUACIONES SUMARIALES VINCULADAS -->
+        <div class="form-card" style="margin-bottom:20px; padding:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 style="margin:0; font-size:17px; color:#1e293b; display:flex; align-items:center; gap:8px;">
+              <span>📁</span> Actuaciones Sumariales e Investigaciones Administrativas
+            </h2>
+            <span class="muted" style="font-size:12px;">{{ expedientes.len() }} actuaciones registradas</span>
+          </div>
+          <div class="table-wrap">
+            <table class="mc-table">
+              <thead>
+                <tr>
+                  <th class="print-th-expte" style="width:190px;">N° Expediente</th>
+                  <th class="print-th-tipo" style="width:110px;">Tipo</th>
+                  <th class="print-th-repart" style="width:130px;">Repartición</th>
+                  <th class="print-th-rol" style="width:120px;">Rol</th>
+                  <th class="print-th-estado" style="width:110px;">Estado</th>
+                  <th class="print-th-fecha" style="width:110px;">Fecha Inicio</th>
+                  <th class="print-th-motivo">Motivo / Objeto de la Investigación</th>
+                  <th class="col-accion" style="text-align:center; width:120px;">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for exp in expedientes %}
+                <tr>
+                  <td style="font-weight:600;">
+                    <a href="/expedientes/{{ exp.expediente_id }}" style="color:var(--azzen-dark); text-decoration:underline;">
+                      {{ exp.numero_expediente }}
+                    </a>
+                  </td>
+                  <td><span class="badge badge-neutral">{{ exp.tipo_identificador }}</span></td>
+                  <td><strong>{{ exp.reparticion }}</strong></td>
+                  <td>
+                    {% if exp.rol == "Instructor" %}
+                    <span class="badge badge-info" style="font-weight:600;">Instructor</span>
+                    {% else %}
+                    <span class="badge badge-neutral">{{ exp.rol }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if exp.estado == "Abierto" || exp.estado == "Inicio" || exp.estado == "En Trámite" %}
+                    <span class="badge badge-warning">{{ exp.estado }}</span>
+                    {% else %}
+                    <span class="badge badge-neutral">{{ exp.estado }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ exp.fecha_inicio.as_deref().unwrap_or("-") }}</td>
+                  <td class="cell-truncate-lg" title="{{ exp.motivo.as_deref().unwrap_or("-") }}">
+                    {{ exp.motivo.as_deref().unwrap_or("-") }}
+                  </td>
+                  <td class="col-accion" style="text-align:center; white-space:nowrap;">
+                    <a href="/expedientes/{{ exp.expediente_id }}" class="button is-dark is-outlined btn-sm" style="font-size:11px; padding:2px 8px;">
+                      Ver Expte ↗
+                    </a>
+                    {% if let Some(pdf) = exp.archivo_pdf.as_deref() %}
+                    <a href="/documentos/{{ pdf }}" target="_blank" class="btn-sm btn-secondary" title="Ver documento adjunto" style="margin-left:4px;">📄</a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% if expedientes.is_empty() %}
+                <tr>
+                  <td colspan="8" style="text-align:center; padding:18px; color:#64748b;">
+                    No se registran expedientes sumarios vinculados para este agente.
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: HISTORIAL DE MEDIDAS CAUTELARES Y SUSPENSIONES PREVENTIVAS -->
+        <div class="form-card" style="margin-bottom:20px; padding:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 style="margin:0; font-size:17px; color:#1e293b; display:flex; align-items:center; gap:8px;">
+              <span>🛡️</span> Régimen de Medidas Cautelares / Suspensiones Preventivas (Art. 419 RRD)
+            </h2>
+            <span class="muted" style="font-size:12px;">{{ suspensiones.len() }} suspensiones registradas</span>
+          </div>
+          <div class="table-wrap">
+            <table class="mc-table">
+              <thead>
+                <tr>
+                  <th class="print-th-susp-exp" style="width:180px;">Expediente / Ref.</th>
+                  <th class="print-th-susp-ini" style="width:110px;">Fecha Inicio</th>
+                  <th class="print-th-susp-enc" style="width:130px;">Encuadre (Art. 419)</th>
+                  <th class="print-th-susp-est" style="width:110px;">Estado</th>
+                  <th class="print-th-susp-fin" style="width:110px;">Fecha Fin</th>
+                  <th class="print-th-susp-mot">Motivo / Fundamentación</th>
+                  <th class="col-accion" style="width:160px; text-align:center;">Acciones / Docs</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in suspensiones %}
+                <tr>
+                  <td>
+                    {% if let Some(eid) = s.expediente_id %}
+                    <a href="/expedientes/{{ eid }}" style="font-weight:600; text-decoration:underline;">
+                      {{ s.numero_expediente.as_deref().unwrap_or("Ver expediente") }}
+                    </a>
+                    {% else %}
+                    <span class="muted">{{ s.numero_expediente.as_deref().unwrap_or("-") }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ s.fecha_inicio }}</td>
+                  <td><span class="badge badge-neutral">Art. 419 {{ s.articulo_419_incisos }}</span></td>
+                  <td>
+                    {% if s.estado == "Vigente" %}
+                    <span class="badge badge-danger">Vigente</span>
+                    {% else if s.estado == "Levantada" %}
+                    <span class="badge badge-success">Levantada</span>
+                    {% else %}
+                    <span class="badge badge-warning">{{ s.estado }}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ s.fecha_fin.as_deref().unwrap_or("—") }}</td>
+                  <td class="cell-truncate-lg" title="{% if let Some(m) = s.motivo_fin.as_deref() %}{{ m }}{% endif %}">
+                    {% if let Some(motivo) = s.motivo_fin.as_deref() %}
+                    <strong>{{ motivo }}</strong><br />
+                    {% endif %}
+                    {% if let Some(fund) = s.fundamento_fin.as_deref() %}
+                    <span style="font-size:12px;" class="muted">{{ fund }}</span>
+                    {% endif %}
+                    {% if let Some(obs) = s.observaciones.as_deref() %}
+                    <div style="font-size:11px; color:#777; margin-top:2px;">{{ obs }}</div>
+                    {% endif %}
+                  </td>
+                  <td class="col-accion" style="white-space:nowrap; text-align:center;">
+                    <a href="/suspensiones/{{ s.id }}" class="button is-dark is-outlined btn-sm" style="padding:2px 8px; font-size:11px;">🛡️ Ver ficha</a>
+                    {% if let Some(pdf) = s.archivo_disposicion_pdf.as_deref() %}
+                    <a href="/documentos/{{ pdf }}" target="_blank" class="btn-sm btn-secondary" title="Disposición">📄</a>
+                    {% endif %}
+                    {% if let Some(pdf) = s.archivo_levantamiento_pdf.as_deref() %}
+                    <a href="/documentos/{{ pdf }}" target="_blank" class="btn-sm btn-secondary" title="Levantamiento">📄</a>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                {% if suspensiones.is_empty() %}
+                <tr>
+                  <td colspan="7" style="text-align:center; padding:18px; color:#64748b;">
+                    El agente no cuenta con registros de suspensión preventiva.
+                  </td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 4: SITUACIÓN JUDICIAL E IMPEDIMENTOS ESTATUTARIOS -->
+        {% if !impedimentos.is_empty() %}
+        <div class="form-card" style="margin-bottom:20px; padding:18px; border-left:4px solid #7e22ce;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 style="margin:0; font-size:17px; color:#1e293b; display:flex; align-items:center; gap:8px;">
+              <span>⚖️</span> Situación Judicial y Registro de Impedimentos Estatutarios
+            </h2>
+            <span class="badge badge-purple">{{ impedimentos.len() }} registro(s)</span>
+          </div>
+          <div class="table-wrap">
+            <table class="mc-table">
+              <thead>
+                <tr>
+                  <th style="width:120px;">Tipo / Registro</th>
+                  <th style="width:160px;">Causa / N° Expte</th>
+                  <th style="width:200px;">Tribunal / Juzgado</th>
+                  <th style="width:110px;">Fecha</th>
+                  <th>Detalle / Fundamento del Impedimento</th>
+                  <th class="col-accion" style="width:90px; text-align:center;">Doc</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for imp in impedimentos %}
+                <tr>
+                  <td><span class="badge badge-purple">{{ imp.tipo_impedimento }}</span></td>
+                  <td><strong>{{ imp.causa }}</strong></td>
+                  <td>{{ imp.tribunal }}</td>
+                  <td>{{ imp.fecha }}</td>
+                  <td class="cell-truncate-lg" title="{{ imp.detalle }}">{{ imp.detalle }}</td>
+                  <td class="col-accion" style="text-align:center;">
+                    {% if let Some(arch) = imp.archivo.as_deref() %}
+                    <a href="/documentos/{{ arch }}" target="_blank" class="btn-secondary btn-sm" title="Ver documental adjunta">📄 Ver</a>
+                    {% else %}
+                    <span class="muted">-</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- SECCIÓN 5: REGISTROS DE INASISTENCIAS Y ACTIVIDAD OPERATIVA -->
+        {% if !inasistencias.is_empty() %}
+        <div class="form-card" style="margin-bottom:20px; padding:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2 style="margin:0; font-size:17px; color:#1e293b; display:flex; align-items:center; gap:8px;">
+              <span>📅</span> Registros de Inasistencias y Actividad Operativa
+            </h2>
+            <span class="muted" style="font-size:12px;">{{ inasistencias.len() }} registro(s)</span>
+          </div>
+          <div class="table-wrap">
+            <table class="mc-table">
+              <thead>
+                <tr>
+                  <th style="width:130px;">Complejo / Unidad</th>
+                  <th style="width:160px;">Motivo Informado</th>
+                  <th style="width:160px;">Expediente Referencia</th>
+                  <th style="width:110px;">Desde</th>
+                  <th style="width:110px;">Hasta</th>
+                  <th>Observaciones / Nota</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for inas in inasistencias %}
+                <tr>
+                  <td><strong>{{ inas.complejo_unidad }}</strong></td>
+                  <td><span class="badge badge-neutral">{{ inas.motivo }}</span></td>
+                  <td>{{ inas.expediente }}</td>
+                  <td>{{ inas.desde }}</td>
+                  <td>{{ inas.hasta }}</td>
+                  <td class="cell-truncate-lg" title="{{ inas.detalle }}">{{ inas.detalle }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- SECCIÓN 6: LÍNEA DE TIEMPO Y TRAZABILIDAD TRANSVERSAL -->
+        <div class="form-card" style="padding:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h2 style="margin:0; font-size:17px; color:#1e293b; display:flex; align-items:center; gap:8px;">
+              <span>📜</span> Línea de Tiempo y Trazabilidad Transversal
+            </h2>
+            <span class="muted" style="font-size:12px;">{{ eventos.len() }} eventos registrados</span>
+          </div>
+          <div class="timeline">
+            {% for ev in eventos %}
+            <div class="timeline-item">
+              <div class="timeline-marker {% if ev.es_auditoria %}marker-audit{% else %}marker-novelty{% endif %}"></div>
+              <div class="timeline-content">
+                <div class="timeline-header">
+                  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <span class="badge {% if ev.es_auditoria %}badge-neutral{% else %}badge-info{% endif %}">{{ ev.tipo }}</span>
+                    <strong style="font-size:14px;">{{ ev.titulo }}</strong>
+                  </div>
+                  <span class="muted" style="font-size:12px;">{{ ev.fecha_evento }} · Ref: <strong>{{ ev.numero_expediente }}</strong></span>
+                </div>
+                <div class="timeline-body" style="margin-top:6px; font-size:13.5px; line-height:1.4; color:#334155;">
+                  {{ ev.descripcion }}
+                </div>
+                <div class="timeline-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:12px;">
+                  <span class="muted">Registrado por: <strong>{{ ev.usuario }}</strong></span>
+                  {% if let Some(pdf) = ev.archivo_pdf.as_deref() %}
+                  <a href="/documentos/{{ pdf }}" target="_blank" class="btn-secondary btn-sm">📄 Ver Documento Adjunto</a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            {% if eventos.is_empty() %}
+            <p class="muted" style="text-align:center; padding:20px;">No hay eventos ni novedades registradas para este agente.</p>
+            {% endif %}
+          </div>
+        </div>
+
+      </main>
+    </div>
+    <script src="/static/azzen.js?v=20261025_11"></script>
+  </body>
+</html>

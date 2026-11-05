@@ -1,0 +1,7 @@
+print("=" * 80)
+print("MODULOS DE REGISTROS SINTÉTICOS - DOCUMENTACIÓN")
+print("=" * 80)
+print(documentation)
+print("\n" + "=" * 80)
+print("FIN DE DOCUMENTACIÓN")
+print("=" * 80)

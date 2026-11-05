@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Códigos de Recuperación de Emergencia · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/bulma.min.css" />
+    <link rel="stylesheet" href="/static/bulma-azzen.css" />
+    <link rel="stylesheet" href="/static/style.css" />
+    <style>
+      .codes-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin: 14px 0;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 14px;
+      }
+      .code-badge {
+        font-family: 'Ubuntu Mono', monospace;
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 6px 10px;
+        text-align: center;
+        letter-spacing: 1.5px;
+      }
+    </style>
+  </head>
+  <body class="login-body">
+    <main class="login-card" style="width: 490px;">
+      <div style="text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 26px; font-weight: 900; letter-spacing: -0.5px; display: inline-flex; align-items: center; gap: 4px;">
+          <span style="color: #e95420;">AZZEN</span>
+          <span style="color: #0f172a;">SPF</span>
+        </div>
+        <div style="font-size: 13px; color: #16a34a; margin-top: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+          ✓ Vinculación TOTP Confirmada · Códigos de Respaldo
+        </div>
+      </div>
+
+      <div class="notification is-warning" style="border-radius: 8px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5; margin-bottom: 12px;">
+        <strong>Importante (Credencial {{ credential }}):</strong> Guarde estos 8 códigos de respaldo en un lugar seguro. <strong>Cada código es de un solo uso</strong> y solo se muestran en esta única ocasión para recuperar el acceso si pierde su teléfono celular.
+      </div>
+
+      <div class="codes-grid" id="codes-box">
+        {% for code in backup_codes %}
+        <div class="code-badge">{{ code }}</div>
+        {% endfor %}
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+        <button type="button" onclick="copiarCodigos()" class="button is-light" style="flex: 1; justify-content: center; font-size: 12.5px;">
+          📋 Copiar
+        </button>
+        <button type="button" onclick="descargarCodigos()" class="button is-light" style="flex: 1; justify-content: center; font-size: 12.5px;">
+          💾 Descargar .txt
+        </button>
+        <button type="button" onclick="imprimirCodigos()" class="button is-light" style="flex: 1; justify-content: center; font-size: 12.5px;">
+          🖨️ Imprimir
+        </button>
+      </div>
+
+      <form method="post" action="/login/totp/backup-codes/confirmar">
+        <div class="field" style="margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px;">
+          <label class="checkbox" style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #1e293b; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" name="confirmado" value="true" required style="width: 16px; height: 16px; accent-color: #e95420;" />
+            <span>Confirmo que he guardado estos códigos de respaldo en un lugar seguro.</span>
+          </label>
+        </div>
+
+        <button type="submit" class="button is-primary is-fullwidth" style="padding: 12px; font-size: 14px; font-weight: 700; height: auto;">
+          Confirmar y Continuar
+        </button>
+      </form>
+
+      <form method="post" action="/login/totp/backup-codes/regenerar" style="margin-top: 10px; text-align: center;">
+        <button type="submit" style="background: none; border: none; color: #64748b; font-size: 12px; text-decoration: underline; cursor: pointer;">
+          ¿Necesita generar un nuevo conjunto de códigos? (Invalida los anteriores)
+        </button>
+      </form>
+
+      <div style="margin-top: 18px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.4;">
+        🔒 Los códigos se almacenan exclusivamente protegidos mediante hash SHA-256 en la base de datos.
+      </div>
+    </main>
+
+    <script>
+      const codes = [
+        {% for code in backup_codes %}
+        "{{ code }}",
+        {% endfor %}
+      ];
+
+      function copiarCodigos() {
+        const text = codes.join("\n");
+        navigator.clipboard.writeText(text).then(() => {
+          alert("Los 8 códigos de respaldo han sido copiados al portapapeles.");
+        });
+      }
+
+      function descargarCodigos() {
+        const content = "AZZEN SPF - CÓDIGOS DE RESPALDO DE UN SOLO USO\nCredencial: {{ credential }}\n==============================================\n\n" + codes.join("\n") + "\n\nGuarde este archivo en un lugar seguro. Cada código solo puede utilizarse una vez.\n";
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "azzen_spf_backup_codes_{{ credential }}.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      function imprimirCodigos() {
+        window.print();
+      }
+    </script>
+  </body>
+</html>

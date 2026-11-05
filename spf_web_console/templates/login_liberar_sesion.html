@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Recuperación Controlada de Sesión · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/bulma.min.css" />
+    <link rel="stylesheet" href="/static/bulma-azzen.css" />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body class="login-body">
+    <main class="login-card" style="width: 480px;">
+      <div style="text-align: center; margin-bottom: 18px;">
+        <div style="font-size: 26px; font-weight: 900; letter-spacing: -0.5px; display: inline-flex; align-items: center; gap: 4px;">
+          <span style="color: #e95420;">AZZEN</span>
+          <span style="color: #0f172a;">SPF</span>
+        </div>
+        <div style="font-size: 13px; color: #dc2626; margin-top: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+          Recuperación Controlada de Sesión Activa
+        </div>
+      </div>
+
+      <div class="notification is-info" style="padding: 12px 14px; font-size: 12.5px; line-height: 1.5; margin-bottom: 16px;">
+        Si perdió acceso a su navegador o equipo anterior y su cuenta mantiene una <strong>sesión activa</strong>, puede revocarla de forma segura verificando su contraseña y su código vigente de <strong>Google Authenticator (TOTP)</strong> o código de respaldo.
+      </div>
+
+      {% if let Some(msg) = error %}
+      <div class="notification is-danger" style="margin-bottom: 16px; padding: 10px 14px; font-size: 13px;">
+        {{ msg }}
+      </div>
+      {% endif %}
+
+      {% if let Some(msg) = success_message %}
+      <div class="notification is-success" style="margin-bottom: 16px; padding: 10px 14px; font-size: 13px;">
+        {{ msg }}
+      </div>
+      {% endif %}
+
+      <form method="post" action="/login/liberar-sesion">
+        <div class="field" style="margin-bottom: 12px;">
+          <label class="label" for="credencial">Número de credencial o usuario *</label>
+          <div class="control">
+            <input class="input" id="credencial" name="credencial" value="{{ credencial }}" placeholder="Ej: 99999" required autofocus />
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom: 12px;">
+          <label class="label" for="password">Contraseña actual *</label>
+          <div class="control">
+            <input class="input" id="password" name="password" type="password" placeholder="••••••••" required />
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom: 12px;">
+          <label class="label" for="codigo_mfa">Código Google Authenticator (6 dígitos) o Código de Respaldo *</label>
+          <div class="control">
+            <input class="input" id="codigo_mfa" name="codigo_mfa" type="text" placeholder="Ej: 123456 o ABCD-EFGH" required style="font-family: 'Ubuntu Mono', monospace; font-weight: 700; letter-spacing: 2px;" />
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom: 16px;">
+          <label class="label" for="motivo">Motivo de revocación de la sesión anterior *</label>
+          <div class="control">
+            <input class="input" id="motivo" name="motivo" type="text" value="Cierre involuntario de navegador o cambio de terminal" required />
+          </div>
+        </div>
+
+        <button type="submit" class="button is-primary is-fullwidth" style="padding: 12px; font-size: 14px; font-weight: 700; height: auto;">
+          Verificar Identidad y Revocar Sesión Anterior
+        </button>
+      </form>
+
+      <div style="margin-top: 16px; text-align: center;">
+        <a href="/login" style="color: #64748b; font-size: 12.5px; text-decoration: none;">
+          ← Volver al inicio de sesión
+        </a>
+      </div>
+
+      <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.4;">
+        🔒 Esta operación exige validación multifactor para impedir que un tercero desconecte al titular legítimo solo con su contraseña.
+      </div>
+    </main>
+  </body>
+</html>

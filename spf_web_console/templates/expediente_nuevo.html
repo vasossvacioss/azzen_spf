@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nuevo Expediente · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/style.css?v=20261031_02" />
+    <style>
+      .autocomplete-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+        max-height: 260px;
+        overflow-y: auto;
+        z-index: 99999;
+        margin-top: 4px;
+      }
+      .autocomplete-item {
+        padding: 9px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        background: #fff;
+      }
+      .autocomplete-item:hover {
+        background-color: #fff7ed;
+        color: #c44000;
+      }
+      .autocomplete-loading {
+        padding: 9px 12px;
+        color: #64748b;
+        font-size: 13px;
+        font-style: italic;
+      }
+      .autocomplete-alert {
+        margin-top: 8px;
+        padding: 10px 14px;
+        background: #fff7ed;
+        border: 1px solid #fdba74;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #9a3412;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .involucrado-card-extra {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 14px;
+        margin-top: 14px;
+        position: relative;
+      }
+    </style>
+    <script>
+      function toggleReparticionOtro() {
+        const rep = document.getElementById("reparticion").value;
+        const box = document.getElementById("reparticion-otro-box");
+        const input = document.getElementById("reparticion_otro");
+        if (rep === "OTRO") {
+          box.style.display = "block";
+          input.required = true;
+        } else {
+          box.style.display = "none";
+          input.required = false;
+        }
+      }
+
+      function toggleAutoridadDependencia() {
+        const aut = document.getElementById("autoridad_ordenante").value;
+        const box = document.getElementById("autoridad-dep-box");
+        if (["Complejos", "Unidades", "Organismos"].includes(aut)) {
+          box.style.display = "block";
+        } else {
+          box.style.display = "none";
+        }
+      }
+
+      function updateIncisos() {
+        const art = document.getElementById("articulo").value;
+        const inciso = document.getElementById("inciso");
+        inciso.innerHTML = '<option value="">-- Seleccionar inciso --</option>';
+        if (art === "Artículo 428") {
+          ["a)", "b)", "c)", "d)", "e)", "f)"].forEach(inc => {
+            const opt = document.createElement("option");
+            opt.value = inc;
+            opt.textContent = "Inciso " + inc;
+            inciso.appendChild(opt);
+          });
+        } else if (art === "Artículo 436") {
+          ["a)", "b)", "c)", "d)"].forEach(inc => {
+            const opt = document.createElement("option");
+            opt.value = inc;
+            opt.textContent = "Inciso " + inc;
+            inciso.appendChild(opt);
+          });
+        }
+      }
+
+      function toggleCausaJudicial() {
+        const causa = document.getElementById("causa_judicial").value;
+        const box = document.getElementById("causa-judicial-fields");
+        box.style.display = causa === "Sí" ? "grid" : "none";
+      }
+
+      function toggleFinalizacion() {
+        const fin = document.getElementById("finalizacion").value;
+        const box = document.getElementById("finalizacion-fields");
+        box.style.display = fin !== "No" ? "grid" : "none";
+      }
+
+      async function verificarDuplicado() {
+        const num = document.getElementById("numero_expediente").value.trim();
+        const tipo = document.getElementById("tipo_identificador").value;
+        const warnDiv = document.getElementById("duplicado-warning");
+        if (!num) {
+          warnDiv.style.display = "none";
+          return;
+        }
+        try {
+          const resp = await fetch(`/api/expedientes/verificar-duplicado?tipo=${encodeURIComponent(tipo)}&numero=${encodeURIComponent(num)}`);
+          const data = await resp.json();
+          if (data.existe) {
+            warnDiv.style.display = "block";
+            warnDiv.className = "alert-error";
+            warnDiv.innerHTML = `❌ <strong>Error de Unicidad Obligatoria (Bloqueante):</strong> Ya existe un expediente registrado con exactamente el mismo número <strong>"${num}"</strong> y tipo <strong>"${tipo}"</strong>. <a href="/expedientes/${data.id}" target="_blank" style="color:#7d1712; font-weight:bold; text-decoration:underline;">Revisar registro existente #${data.id} ↗</a>.`;
+          } else if (data.posible_duplicado) {
+            warnDiv.style.display = "block";
+            warnDiv.className = "alert-warning";
+            warnDiv.innerHTML = `⚠️ <strong>Advertencia — Posible Duplicado (No bloquea el guardado):</strong> ${data.motivo_coincidencia || 'Se detectó un expediente similar o bajo otro tipo de identificador.'} <a href="/expedientes/${data.id}" target="_blank" style="color:#7d1712; font-weight:bold; text-decoration:underline;">Inspeccionar registro #${data.id} ↗</a>.`;
+          } else {
+            warnDiv.style.display = "none";
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Autocomplete predictivo robusto
+      let targetPrefixGlobal = 'involucrado';
+      let contadorInvolucrados = 0;
+
+      function setupPredictivoAgente(credInputId, apelInputId, nomInputId, escInputId, grdInputId, dropdownId, alertaId, targetPrefix) {
+        const credInput = document.getElementById(credInputId);
+        const apelInput = document.getElementById(apelInputId);
+        const nomInput = document.getElementById(nomInputId);
+        const escInput = document.getElementById(escInputId);
+        const grdInput = document.getElementById(grdInputId);
+        const dropdown = document.getElementById(dropdownId);
+        const alerta = document.getElementById(alertaId);
+
+        if (!credInput || !dropdown) return;
+
+        let debounceTimer = null;
+
+        async function ejecutarBusqueda() {
+          const val = credInput.value.trim();
+          if (alerta) alerta.style.display = 'none';
+
+          if (val.length < 1) {
+            dropdown.style.display = 'none';
+            dropdown.innerHTML = '';
+            return;
+          }
+
+          try {
+            dropdown.innerHTML = '<div class="autocomplete-loading">🔍 Buscando en padrón central...</div>';
+            dropdown.style.display = 'block';
+
+            const res = await fetch(`/api/personas/buscar?q=${encodeURIComponent(val)}`);
+            const jsonResp = await res.json();
+            const personas = Array.isArray(jsonResp) ? jsonResp : (jsonResp.personas || []);
+
+            if (!personas || personas.length === 0) {
+              dropdown.style.display = 'none';
+              if (alerta) alerta.style.display = 'flex';
+              return;
+            }
+
+            dropdown.innerHTML = '';
+            personas.forEach(p => {
+              const item = document.createElement('div');
+              item.className = 'autocomplete-item';
+              const escGrd = [p.escalafon, p.grado].filter(Boolean).join(' - ') || 'Sin escalafón asignado';
+              item.innerHTML = `<strong>${p.credencial} – ${p.apellido}, ${p.nombre}</strong><span style="font-size:12px; color:#64748b;">${escGrd}</span>`;
+              
+              item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                credInput.value = p.credencial;
+                if (apelInput) apelInput.value = p.apellido || '';
+                if (nomInput) nomInput.value = p.nombre || '';
+                if (escInput) escInput.value = p.escalafon || '';
+                if (grdInput) grdInput.value = p.grado || '';
+                dropdown.style.display = 'none';
+                if (alerta) alerta.style.display = 'none';
+              });
+              dropdown.appendChild(item);
+            });
+            dropdown.style.display = 'block';
+          } catch (err) {
+            console.error('Error buscando agente:', err);
+            dropdown.style.display = 'none';
+          }
+        }
+
+        credInput.addEventListener('input', () => {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(ejecutarBusqueda, 200);
+        });
+
+        credInput.addEventListener('focus', () => {
+          if (credInput.value.trim().length >= 1) {
+            ejecutarBusqueda();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!credInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+          }
+        });
+      }
+
+      function abrirModalNuevoAgente(prefix) {
+        targetPrefixGlobal = prefix;
+        const modal = document.getElementById('modal-nuevo-agente');
+        const errBox = document.getElementById('modal-agente-error');
+        if (errBox) errBox.style.display = 'none';
+
+        let currentVal = '';
+        const inp = document.getElementById(prefix + '_credencial');
+        if (inp) currentVal = inp.value.trim();
+
+        document.getElementById('modal_credencial').value = currentVal;
+        document.getElementById('modal_apellido').value = '';
+        document.getElementById('modal_nombre').value = '';
+        document.getElementById('modal_escalafon').value = '';
+        document.getElementById('modal_grado').value = '';
+
+        if (modal) modal.style.display = 'flex';
+        document.getElementById('modal_credencial').focus();
+      }
+
+      function cerrarModalNuevoAgente() {
+        const modal = document.getElementById('modal-nuevo-agente');
+        if (modal) modal.style.display = 'none';
+      }
+
+      async function guardarNuevoAgenteExpress(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-modal-guardar-agente');
+        const errBox = document.getElementById('modal-agente-error');
+        if (errBox) errBox.style.display = 'none';
+
+        const credencial = document.getElementById('modal_credencial').value.trim();
+        const apellido = document.getElementById('modal_apellido').value.trim();
+        const nombre = document.getElementById('modal_nombre').value.trim();
+        const escalafon = document.getElementById('modal_escalafon').value.trim();
+        const grado = document.getElementById('modal_grado').value.trim();
+
+        if (!credencial || !apellido || !nombre) {
+          if (errBox) {
+            errBox.textContent = 'Credencial, apellido y nombre son obligatorios.';
+            errBox.style.display = 'block';
+          }
+          return;
+        }
+
+        try {
+          if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+          }
+
+          const resp = await fetch('/api/personas/express', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credencial, apellido, nombre, escalafon, grado })
+          });
+          const data = await resp.json();
+
+          if (!data.success) {
+            throw new Error(data.message || data.error || 'Error registrando agente');
+          }
+
+          const pfx = targetPrefixGlobal;
+          const c = document.getElementById(pfx + '_credencial');
+          const a = document.getElementById(pfx + '_apellido');
+          const n = document.getElementById(pfx + '_nombre');
+          const es = document.getElementById(pfx + '_escalafon');
+          const g = document.getElementById(pfx + '_grado');
+          if (c) c.value = credencial;
+          if (a) a.value = apellido;
+          if (n) n.value = nombre;
+          if (es) es.value = escalafon;
+          if (g) g.value = grado;
+
+          const alerta = document.getElementById('alerta-' + pfx + '-no-encontrado');
+          if (alerta) alerta.style.display = 'none';
+
+          cerrarModalNuevoAgente();
+        } catch (err) {
+          if (errBox) {
+            errBox.textContent = err.message || 'Ocurrió un error al registrar el agente.';
+            errBox.style.display = 'block';
+          }
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Guardar e Incorporar Agente';
+          }
+        }
+      }
+
+      // Función para agregar otro involucrado dinámicamente con signo +
+      function agregarOtroInvolucrado() {
+        contadorInvolucrados++;
+        const idx = contadorInvolucrados;
+        const container = document.getElementById('involucrados-adicionales-container');
+        if (!container) return;
+
+        const card = document.createElement('div');
+        card.className = 'involucrado-card-extra';
+        card.id = `involucrado-extra-${idx}`;
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+            <strong style="color:#0f172a; font-size:14px;">👤 Agente Involucrado Adicional #${idx + 1}</strong>
+            <button type="button" class="button is-danger is-outlined btn-sm" onclick="quitarInvolucrado(${idx})" style="cursor:pointer; font-size:12px; padding:3px 8px;">
+              🗑️ Quitar
+            </button>
+          </div>
+          <div class="form-grid-3">
+            <div class="form-field autocomplete-wrapper" style="position:relative;">
+              <label for="involucrado_credencial_${idx}">Número de credencial *</label>
+              <input id="involucrado_credencial_${idx}" name="involucrado_credencial_${idx}" placeholder="Ej: 26493" autocomplete="off" />
+              <div id="involucrado-sugerencias-${idx}" class="autocomplete-dropdown" style="display:none;"></div>
+            </div>
+            <div class="form-field">
+              <label for="involucrado_apellido_${idx}">Apellido *</label>
+              <input id="involucrado_apellido_${idx}" name="involucrado_apellido_${idx}" placeholder="Ej: PÉREZ" />
+            </div>
+            <div class="form-field">
+              <label for="involucrado_nombre_${idx}">Nombre *</label>
+              <input id="involucrado_nombre_${idx}" name="involucrado_nombre_${idx}" placeholder="Ej: Juan Manuel" />
+            </div>
+          </div>
+          <div id="alerta-involucrado-${idx}-no-encontrado" class="autocomplete-alert" style="display:none;">
+            <span>⚠️ La persona no se encuentra en el padrón central.</span>
+            <button type="button" class="button is-warning btn-sm" onclick="abrirModalNuevoAgente('involucrado_${idx}')">➕ Registrar nuevo agente</button>
+          </div>
+          <div class="form-grid-3" style="margin-top:8px;">
+            <div class="form-field">
+              <label for="involucrado_escalafon_${idx}">Escalafón</label>
+              <input id="involucrado_escalafon_${idx}" name="involucrado_escalafon_${idx}" list="lista-escalafones" placeholder="Seleccionar o escribir..." />
+            </div>
+            <div class="form-field">
+              <label for="involucrado_grado_${idx}">Grado</label>
+              <input id="involucrado_grado_${idx}" name="involucrado_grado_${idx}" list="lista-grados" placeholder="Seleccionar o escribir..." />
+            </div>
+            <div class="form-field">
+              <label for="involucrado_rol_${idx}">Rol en la actuación *</label>
+              <select id="involucrado_rol_${idx}" name="involucrado_rol_${idx}">
+                <option value="Causante">Causante</option>
+                <option value="Imputado" selected>Imputado</option>
+                <option value="Sumariado">Sumariado</option>
+                <option value="Testigo">Testigo</option>
+                <option value="Afectado">Afectado</option>
+              </select>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+
+        // Conectar autocomplete para este nuevo agente
+        setupPredictivoAgente(
+          `involucrado_credencial_${idx}`,
+          `involucrado_apellido_${idx}`,
+          `involucrado_nombre_${idx}`,
+          `involucrado_escalafon_${idx}`,
+          `involucrado_grado_${idx}`,
+          `involucrado-sugerencias-${idx}`,
+          `alerta-involucrado-${idx}-no-encontrado`,
+          `involucrado_${idx}`
+        );
+
+        document.getElementById(`involucrado_credencial_${idx}`).focus();
+      }
+
+      function quitarInvolucrado(idx) {
+        const el = document.getElementById(`involucrado-extra-${idx}`);
+        if (el) el.remove();
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        toggleReparticionOtro();
+        toggleAutoridadDependencia();
+        updateIncisos();
+        toggleCausaJudicial();
+        toggleFinalizacion();
+
+        // Inicializar autocomplete del involucrado principal
+        setupPredictivoAgente(
+          'involucrado_credencial',
+          'involucrado_apellido',
+          'involucrado_nombre',
+          'involucrado_escalafon',
+          'involucrado_grado',
+          'involucrado-sugerencias',
+          'alerta-involucrado-no-encontrado',
+          'involucrado'
+        );
+      });
+    </script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <div class="notif-wrapper" style="position:relative;">
+          <button id="notif-bell-btn" class="notif-bell-btn" type="button" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
+            🔔
+            <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+            <div class="notif-dropdown-header">
+              <span style="font-weight:700;">Notificaciones</span>
+              <a href="javascript:void(0)" onclick="marcarTodasLeidas()" style="font-size:12px; color:var(--azzen-orange);">Marcar leídas</a>
+            </div>
+            <div id="notif-items-list" class="notif-items-list">
+              <div class="notif-empty">Cargando...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="/notificaciones">Ver todas las notificaciones →</a>
+            </div>
+          </div>
+        </div>
+
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+          <a href="/notificaciones" class="nav-item">
+            <span>🔔</span> Notificaciones
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item active" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          {% for f in nav_files %}
+          <details>
+            <summary>📊 {{ f.file_name }}</summary>
+            <div class="subnav">
+              {% for s in f.sheets %}
+              <a href="/fuente/{{ f.file_id }}/hoja/{{ s.sheet_id }}">{{ s.sheet_name }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Búsqueda global
+          </a>
+          <a href="/personas" class="nav-item">
+            <span>👥</span> Personas
+          </a>
+          <a href="/staging" class="nav-item">
+            <span>⚠️</span> Staging sin credencial
+          </a>
+          <a href="/modulos" class="nav-item">
+            <span>📦</span> Catálogo de Módulos
+          </a>
+          <a href="/modulos/dashboard" class="nav-item">
+            <span>📊</span> Dashboard Estadístico
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Auditoría y Sistema</div>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🧹</span> Calidad de Datos
+          </a>
+          <a href="/administracion/versiones" class="nav-item">
+            <span>📜</span> Control de versiones
+          </a>
+          <a href="/seguridad" class="nav-item">
+            <span>🛡️</span> Centro de Seguridad
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li><a href="/expedientes">Gestión de Actuaciones</a></li>
+            <li class="is-active"><a href="/expedientes/nuevo">Alta de Expediente</a></li>
+          </ul>
+        </div>
+
+        <div class="mc-header-bar">
+          <div>
+            <h1 class="mc-header-title">
+              <span>➕</span>
+              <span>Alta de Nuevo Expediente</span>
+            </h1>
+            <p class="mc-header-subtitle">
+              Complete los datos organizados por secciones institucionales unificadas. Al guardar se registrará la actuación y se vincularán los agentes en el padrón central.
+            </p>
+          </div>
+          <div class="mc-header-actions">
+            <a href="/expedientes" class="button is-dark is-outlined btn-sm">← Volver al listado</a>
+          </div>
+        </div>
+
+        {% if let Some(err) = error_msg %}
+        <div class="alert-error">{{ err }}</div>
+        {% endif %}
+
+        {% if let Some(warn) = warning_duplicado %}
+        <div class="alert-warning">{{ warn }}</div>
+        {% endif %}
+
+        <div id="duplicado-warning" class="alert-warning" style="display:none;"></div>
+
+        <form method="post" action="/expedientes/nuevo" enctype="multipart/form-data" class="form-card">
+          <input type="hidden" name="modo_no_bloqueante" value="true" />
+          
+          <!-- SECCIÓN A: IDENTIFICACIÓN DEL EXPEDIENTE -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>Sección A: Identificación del Expediente</span>
+            </div>
+            <div class="form-grid-3">
+              <div class="form-field">
+                <label for="tipo_identificador">Tipo de identificador *</label>
+                <select id="tipo_identificador" name="tipo_identificador" required onchange="verificarDuplicado();">
+                  <option value="Electrónico" selected>Electrónico</option>
+                  <option value="CUDAP">CUDAP</option>
+                  <option value="Expediente de Unidad">Expediente de Unidad</option>
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label for="numero_expediente">Número de expediente *</label>
+                <input id="numero_expediente" name="numero_expediente" required placeholder="Ej: EX-2024-12345678- -APN-DSG#SPF" onblur="verificarDuplicado();" />
+              </div>
+
+              <div class="form-field">
+                <label for="reparticion">Repartición *</label>
+                <select id="reparticion" name="reparticion" required onchange="toggleReparticionOtro();">
+                  <option value="">-- Seleccionar Repartición --</option>
+                  {% for rep in reparticiones_list %}
+                  {% if rep != "Sin datos" %}
+                  <option value="{{ rep }}">{{ rep }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-2" style="margin-top:8px;">
+              <div class="form-field" id="reparticion-otro-box" style="display:none;">
+                <label for="reparticion_otro">Especificar otra repartición *</label>
+                <input id="reparticion_otro" name="reparticion_otro" placeholder="Nombre de la repartición u organismo" />
+              </div>
+              <div class="form-field">
+                <label for="destino_origen">Destino / Origen administrativo</label>
+                <input id="destino_origen" name="destino_origen" placeholder="Ej: Complejo Penitenciario Federal I / Unidad 6" />
+              </div>
+            </div>
+
+            <div class="form-grid-3" style="margin-top:8px;">
+              <div class="form-field">
+                <label for="fecha_inicio">Fecha de inicio</label>
+                <input id="fecha_inicio" name="fecha_inicio" type="date" />
+              </div>
+              <div class="form-field">
+                <label for="fecha_hecho">Fecha del hecho investigado</label>
+                <input id="fecha_hecho" name="fecha_hecho" type="date" />
+              </div>
+              <div class="form-field">
+                <label for="fecha_prevista_fin">Fecha prevista de culminación</label>
+                <input id="fecha_prevista_fin" name="fecha_prevista_fin" type="date" />
+              </div>
+            </div>
+
+            <div class="form-grid-2" style="margin-top:8px;">
+              <div class="form-field">
+                <label for="autoridad_ordenante">Autoridad que ordena la investigación</label>
+                <select id="autoridad_ordenante" name="autoridad_ordenante" onchange="toggleAutoridadDependencia();">
+                  <option value="">-- Seleccionar Autoridad --</option>
+                  <option value="Ministro">Ministro</option>
+                  <option value="Director Nacional">Director Nacional</option>
+                  <option value="Subdirector Nacional">Subdirector Nacional</option>
+                  <option value="Director General del Cuerpo Penitenciario">Director General del Cuerpo Penitenciario</option>
+                  <option value="Director General del Régimen Correccional">Director General del Régimen Correccional</option>
+                  <option value="Complejos">Complejos</option>
+                  <option value="Unidades">Unidades</option>
+                  <option value="Organismos">Organismos</option>
+                </select>
+              </div>
+              <div class="form-field" id="autoridad-dep-box" style="display:none;">
+                <label for="autoridad_dependencia">Dependencia concreta de la autoridad</label>
+                <input id="autoridad_dependencia" name="autoridad_dependencia" placeholder="Especificar complejo, unidad u organismo" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN B: AGENTE INVOLUCRADO / CAUSANTE -->
+          <div class="form-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+              <div class="form-section-title" style="margin-bottom:0;">
+                <span>Sección B: Agente Involucrado / Causante (Padrón Central)</span>
+              </div>
+              <button type="button" class="btn-primary btn-sm" onclick="agregarOtroInvolucrado()" style="display:inline-flex; align-items:center; gap:6px; font-weight:700; background:#e95420; border-color:#e95420;">
+                <span>➕</span> Agregar otro involucrado
+              </button>
+            </div>
+
+            <!-- Involucrado Principal -->
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:14px;">
+              <div style="font-size:13px; font-weight:700; color:#475569; margin-bottom:10px;">
+                👤 Agente Involucrado Principal
+              </div>
+              <div class="form-grid-3">
+                <div class="form-field autocomplete-wrapper" style="position:relative;">
+                  <label for="involucrado_credencial">Número de credencial *</label>
+                  <input id="involucrado_credencial" name="involucrado_credencial" placeholder="Ej: 26493" autocomplete="off" />
+                  <div id="involucrado-sugerencias" class="autocomplete-dropdown" style="display:none;"></div>
+                </div>
+                <div class="form-field">
+                  <label for="involucrado_apellido">Apellido *</label>
+                  <input id="involucrado_apellido" name="involucrado_apellido" placeholder="Ej: ESCOBAR" />
+                </div>
+                <div class="form-field">
+                  <label for="involucrado_nombre">Nombre *</label>
+                  <input id="involucrado_nombre" name="involucrado_nombre" placeholder="Ej: Juan Carlos" />
+                </div>
+              </div>
+
+              <div id="alerta-involucrado-no-encontrado" class="autocomplete-alert" style="display:none;">
+                <span>⚠️ La persona no se encuentra en el padrón central.</span>
+                <button type="button" class="button is-warning btn-sm" onclick="abrirModalNuevoAgente('involucrado')">➕ Registrar nuevo agente</button>
+              </div>
+
+              <div class="form-grid-3" style="margin-top:8px;">
+                <div class="form-field">
+                  <label for="involucrado_escalafon">Escalafón</label>
+                  <input id="involucrado_escalafon" name="involucrado_escalafon" list="lista-escalafones" placeholder="Seleccionar o escribir..." />
+                </div>
+                <div class="form-field">
+                  <label for="involucrado_grado">Grado</label>
+                  <input id="involucrado_grado" name="involucrado_grado" list="lista-grados" placeholder="Seleccionar o escribir..." />
+                </div>
+                <div class="form-field">
+                  <label for="involucrado_rol">Rol en la actuación *</label>
+                  <select id="involucrado_rol" name="involucrado_rol">
+                    <option value="Causante" selected>Causante</option>
+                    <option value="Imputado">Imputado</option>
+                    <option value="Sumariado">Sumariado</option>
+                    <option value="Testigo">Testigo</option>
+                    <option value="Afectado">Afectado</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contenedor dinámico de involucrados adicionales (+) -->
+            <div id="involucrados-adicionales-container"></div>
+          </div>
+
+          <!-- SECCIÓN C: MOTIVO Y ESTADO DE LA ACTUACIÓN -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>Sección C: Motivo y Estado de la Actuación</span>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label for="motivo">Motivo de la actuación *</label>
+                <input id="motivo" name="motivo" required list="lista-motivos" placeholder="Seleccione o ingrese motivo de la actuación..." />
+              </div>
+              <div class="form-field">
+                <label for="estado">Estado de la actuación *</label>
+                <select id="estado" name="estado" required>
+                  <option value="Creado" selected>Creado</option>
+                  <option value="Abierto">Abierto</option>
+                  <option value="En trámite">En trámite</option>
+                  <option value="Inicio">Inicio</option>
+                  <option value="Acumulación">Acumulación</option>
+                  <option value="Reapertura">Reapertura</option>
+                  <option value="Reconstrucción">Reconstrucción</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN D: TIPO DE ACTUACIÓN (ARTÍCULO E INCISO) -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>Sección D: Tipo de Actuación (Artículo e Inciso)</span>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label for="articulo">Artículo</label>
+                <select id="articulo" name="articulo" onchange="updateIncisos();">
+                  <option value="">-- Seleccionar Artículo --</option>
+                  <option value="Artículo 428">Artículo 428 (Informaciones Sumarias)</option>
+                  <option value="Artículo 436">Artículo 436 (Sumarios Administrativos)</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="inciso">Inciso correspondiente</label>
+                <select id="inciso" name="inciso">
+                  <option value="">-- Primero seleccione artículo --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN E: RELATO DE LOS HECHOS -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>Sección E: Relato de los Hechos</span>
+            </div>
+            <div class="form-field">
+              <label for="relato_hechos">Descripción circunstanciada de los hechos investigados</label>
+              <textarea id="relato_hechos" name="relato_hechos" rows="4" placeholder="Ingrese el relato completo de los hechos, actuaciones u origen del sumario..."></textarea>
+            </div>
+          </div>
+
+          <!-- SECCIÓN F: INSTRUCTOR DESIGNADO -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>Sección F: Instructor Designado</span>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label for="instructor_credencial">Credencial del instructor</label>
+                <input id="instructor_credencial" name="instructor_credencial" placeholder="Ej: 33436" />
+              </div>
+              <div class="form-field">
+                <label for="instructor_actual">Nombre, apellido y grado del instructor *</label>
+                <input id="instructor_actual" name="instructor_actual" required placeholder="Ej: Subprefecto Natalia Inés TORRES" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN G: CAUSA JUDICIAL VINCULADA -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>Sección G: Causa Judicial Vinculada</span>
+            </div>
+            <div class="form-field" style="max-width:240px;">
+              <label for="causa_judicial">¿Tiene causa judicial vinculada?</label>
+              <select id="causa_judicial" name="causa_judicial" onchange="toggleCausaJudicial();">
+                <option value="No" selected>No</option>
+                <option value="Sí">Sí</option>
+              </select>
+            </div>
+            <div class="form-grid-2" id="causa-judicial-fields" style="display:none; margin-top:10px;">
+              <div class="form-field">
+                <label for="juzgado">Juzgado interviniente</label>
+                <input id="juzgado" name="juzgado" placeholder="Ej: Juzgado Federal en lo Criminal y Correccional N° 1" />
+              </div>
+              <div class="form-field">
+                <label for="caratula">Carátula de la causa judicial</label>
+                <input id="caratula" name="caratula" placeholder="Ej: Perez Juan s/ Apremios ilegales" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN H: FINALIZACIÓN DE LA ACTUACIÓN -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>Sección H: Finalización de la Actuación</span>
+            </div>
+            <div class="form-field" style="max-width:240px;">
+              <label for="finalizacion">Estado de finalización general</label>
+              <select id="finalizacion" name="finalizacion" onchange="toggleFinalizacion();">
+                <option value="No" selected>No</option>
+                <option value="Sí parcial">Sí parcial</option>
+                <option value="Sí">Sí</option>
+                <option value="Sobreseimiento">Sobreseimiento</option>
+                <option value="Exención de sanción">Exención de sanción</option>
+                <option value="Sanción disciplinaria">Sanción disciplinaria</option>
+              </select>
+            </div>
+            <div class="form-grid-2" id="finalizacion-fields" style="display:none; margin-top:10px;">
+              <div class="form-field">
+                <label for="fecha_finalizacion">Fecha de finalización</label>
+                <input id="fecha_finalizacion" name="fecha_finalizacion" type="date" />
+              </div>
+              <div class="form-field">
+                <label for="doc_finalizacion">Disposición u orden de cierre (PDF)</label>
+                <input id="doc_finalizacion" name="doc_finalizacion" type="file" accept=".pdf" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN I: DOCUMENTACIÓN INICIAL DE RESPALDO -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>Sección I: Documentación Inicial de Respaldo</span>
+            </div>
+            <div class="form-grid-2">
+              <div class="form-field">
+                <label for="doc_informe_hechos">Informe inicial completo de los hechos (PDF)</label>
+                <input id="doc_informe_hechos" name="doc_informe_hechos" type="file" accept=".pdf" />
+              </div>
+              <div class="form-field">
+                <label for="doc_disposicion">Orden interna o disposición de sustanciación (PDF)</label>
+                <input id="doc_disposicion" name="doc_disposicion" type="file" accept=".pdf" />
+              </div>
+            </div>
+          </div>
+
+          <!-- ACCIONES DE FORMULARIO -->
+          <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+            <a href="/expedientes" class="btn-secondary">Cancelar</a>
+            <button type="submit" class="btn-primary" style="font-size:15px; padding:10px 24px;">
+              Crear Expediente
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <!-- DATALISTS COMPARTIDOS -->
+    <datalist id="lista-motivos">
+      {% for m in motivos_list %}
+      <option value="{{ m }}"></option>
+      {% endfor %}
+    </datalist>
+
+    <datalist id="lista-escalafones">
+      <option value="Cuerpo General"></option>
+      <option value="Profesional"></option>
+      <option value="Administrativo"></option>
+      <option value="Auxiliar"></option>
+      <option value="Subprofesional"></option>
+    </datalist>
+
+    <datalist id="lista-grados">
+      <option value="Inspector General"></option>
+      <option value="Prefecto"></option>
+      <option value="Subprefecto"></option>
+      <option value="Alcaide Mayor"></option>
+      <option value="Alcaide"></option>
+      <option value="Subalcaide"></option>
+      <option value="Adjutor Principal"></option>
+      <option value="Adjutor"></option>
+      <option value="Subadjutor"></option>
+      <option value="Ayudante Mayor"></option>
+      <option value="Ayudante Principal"></option>
+      <option value="Ayudante de 1ra"></option>
+      <option value="Ayudante de 2da"></option>
+      <option value="Ayudante de 3ra"></option>
+      <option value="Ayudante de 4ta"></option>
+      <option value="Ayudante de 5ta"></option>
+      <option value="Subayudante"></option>
+    </datalist>
+
+    <!-- MODAL DE ALTA EXPRESS DE AGENTE -->
+    <div id="modal-nuevo-agente" class="modal-express-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:999999; align-items:center; justify-content:center;">
+      <div class="modal-express-box" style="background:#fff; border-radius:8px; width:100%; max-width:540px; padding:24px; box-shadow:0 20px 40px rgba(0,0,0,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid #e5e7eb; padding-bottom:12px;">
+          <h3 style="margin:0; font-size:18px; color:#1f2937;">➕ Registrar Nuevo Agente en Padrón (Alta Express)</h3>
+          <button type="button" onclick="cerrarModalNuevoAgente()" style="background:none; border:none; font-size:24px; cursor:pointer; color:#6b7280; line-height:1;">&times;</button>
+        </div>
+        <div id="modal-agente-error" class="alert-error" style="display:none; margin-bottom:12px;"></div>
+        <form id="form-modal-nuevo-agente" onsubmit="guardarNuevoAgenteExpress(event)">
+          <div class="form-grid-2">
+            <div class="form-field">
+              <label for="modal_credencial">Número de Credencial *</label>
+              <input type="text" id="modal_credencial" required placeholder="Ej: 77777" />
+            </div>
+            <div class="form-field">
+              <label for="modal_apellido">Apellido *</label>
+              <input type="text" id="modal_apellido" required placeholder="Ej: PÉREZ" />
+            </div>
+          </div>
+          <div class="form-grid-2" style="margin-top:10px;">
+            <div class="form-field">
+              <label for="modal_nombre">Nombre *</label>
+              <input type="text" id="modal_nombre" required placeholder="Ej: Juan Manuel" />
+            </div>
+            <div class="form-field">
+              <label for="modal_escalafon">Escalafón</label>
+              <input type="text" id="modal_escalafon" list="lista-escalafones" placeholder="Seleccionar o escribir..." />
+            </div>
+          </div>
+          <div class="form-field" style="margin-top:10px;">
+            <label for="modal_grado">Grado</label>
+            <input type="text" id="modal_grado" list="lista-grados" placeholder="Seleccionar o escribir..." />
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+            <button type="button" class="btn-secondary" onclick="cerrarModalNuevoAgente()">Cancelar</button>
+            <button type="submit" class="btn-primary" id="btn-modal-guardar-agente">Guardar e Incorporar Agente</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/static/azzen.js?v=20261031_02"></script>
+  </body>
+</html>

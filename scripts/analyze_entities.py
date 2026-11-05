@@ -1,0 +1,22 @@
+import psycopg2
+def analyze_unique_entities():
+    conn = psycopg2.connect(host='localhost', port=5432, dbname='spf_excel', user='postgres', password='admin123')
+    cur = conn.cursor()
+    all_creds = set()
+    cur.execute("SELECT DISTINCT credencial FROM personas WHERE credencial IS NOT NULL AND credencial != '';")
+    all_creds.update([r[0].strip() for r in cur.fetchall()])
+    cur.execute("SELECT DISTINCT credencial FROM expediente_agentes WHERE credencial IS NOT NULL AND credencial != '';")
+    all_creds.update([r[0].strip() for r in cur.fetchall()])
+    cur.execute("SELECT DISTINCT credencial FROM expediente_suspensiones WHERE credencial IS NOT NULL AND credencial != '';")
+    all_creds.update([r[0].strip() for r in cur.fetchall()])
+    cur.execute("SELECT DISTINCT instructor_credencial FROM expedientes WHERE instructor_credencial IS NOT NULL AND instructor_credencial != '';")
+    all_creds.update([r[0].strip() for r in cur.fetchall()])
+    cur.execute("SELECT DISTINCT credential_value FROM row_credential_index WHERE credential_value IS NOT NULL AND credential_value != '';")
+    all_creds.update([r[0].strip() for r in cur.fetchall()])
+    print(f"Total credenciales únicas encontradas en sistema: {len(all_creds)}")
+    cur.execute("SELECT DISTINCT numero_expediente FROM expedientes WHERE numero_expediente IS NOT NULL AND numero_expediente != '';")
+    exps = set([r[0].strip() for r in cur.fetchall()])
+    print(f"Total expedientes únicos encontrados en sistema: {len(exps)}")
+    conn.close()
+if __name__ == '__main__':
+    analyze_unique_entities()

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Centro de Notificaciones · AZZEN SPF</title>
+    <link rel="stylesheet" href="/static/bulma.min.css" />
+    <link rel="stylesheet" href="/static/bulma-azzen.css" />
+    <link rel="stylesheet" href="/static/style.css?v=20261025_11" />
+  </head>
+  <body>
+        <header class="topbar">
+      <a href="/" class="brand">
+        <img src="/static/azzen_spf_web.png" alt="AZZEN SPF" class="brand-logo" />
+        <span class="brand-azzen">AZZEN</span>
+        <span class="brand-spf">SPF</span>
+      </a>
+      <div class="navbar-search" id="navbar-search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="navbar-search-input" placeholder="Buscar expedientes, agentes, credenciales o actuaciones..." autocomplete="off" />
+        <div id="navbar-search-dropdown" class="search-dropdown" style="display:none;"></div>
+      </div>
+      <div class="user-menu" style="display:flex; align-items:center; gap:12px;">
+        <div class="notif-wrapper" style="position:relative;">
+          <button id="notif-bell-btn" class="notif-bell-btn" type="button" aria-label="Notificaciones" onclick="toggleNotifDropdown(event)">
+            🔔
+            <span id="notif-badge" class="notif-badge" style="display:none;">0</span>
+          </button>
+          <div id="notif-dropdown" class="notif-dropdown" style="display:none;">
+            <div class="notif-dropdown-header">
+              <span style="font-weight:700;">Notificaciones</span>
+              <a href="javascript:void(0)" onclick="marcarTodasLeidas()" style="font-size:12px; color:var(--azzen-orange);">Marcar leídas</a>
+            </div>
+            <div id="notif-items-list" class="notif-items-list">
+              <div class="notif-empty">Cargando...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="/notificaciones">Ver todas las notificaciones →</a>
+            </div>
+          </div>
+        </div>
+
+        <span class="user-pill">👤 {{ user_name }}</span>
+        <a href="/logout" class="btn-logout">Salir</a>
+      </div>
+    </header>
+
+    <div class="layout">
+            <aside class="sidebar">
+        <div class="sidebar-section-title">Principal</div>
+        <a href="/" class="nav-item">
+          <span>🏠</span> Inicio
+        </a>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Gestión de Actuaciones Sumariales y Suspensiones</div>
+          <div class="sidebar-desc">Alta de expedientes, instructores, agentes, historial cronológico unificado, control central de suspensiones y trazabilidad.</div>
+          <a href="/expedientes" class="nav-item">
+            <span>📁</span> Gestión de Actuaciones
+          </a>
+          <a href="/suspensiones" class="nav-item">
+            <span>🛡️</span> Control de Suspensiones
+          </a>
+          <a href="/notificaciones" class="nav-item active">
+            <span>🔔</span> Notificaciones
+          </a>
+          <a href="/expedientes/nuevo" class="nav-item" style="margin-top: 4px; font-weight: 700; color: #e95420;">
+            <span>➕</span> Crear nuevo expediente
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Módulos de Registros</div>
+          {% for f in nav_files %}
+          <details>
+            <summary>📊 {{ f.file_name }}</summary>
+            <div class="subnav">
+              {% for s in f.sheets %}
+              <a href="/fuente/{{ f.file_id }}/hoja/{{ s.sheet_id }}">{{ s.sheet_name }}</a>
+              {% endfor %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Herramientas de Consulta</div>
+          <a href="/busqueda-global" class="nav-item">
+            <span>🔍</span> Búsqueda global
+          </a>
+          <a href="/personas" class="nav-item">
+            <span>👥</span> Personas
+          </a>
+          <a href="/staging" class="nav-item">
+            <span>⚠️</span> Staging sin credencial
+          </a>
+          <a href="/modulos" class="nav-item">
+            <span>📦</span> Catálogo de Módulos
+          </a>
+          <a href="/modulos/dashboard" class="nav-item">
+            <span>📊</span> Dashboard Estadístico
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Auditoría y Sistema</div>
+          <a href="/calidad-datos" class="nav-item">
+            <span>🧹</span> Calidad de Datos
+          </a>
+          <a href="/administracion/versiones" class="nav-item">
+            <span>📜</span> Control de versiones
+          </a>
+          <a href="/seguridad" class="nav-item">
+            <span>🛡️</span> Centro de Seguridad
+          </a>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="breadcrumb">
+          <ul>
+            <li><a href="/">Inicio</a></li>
+            <li class="is-active"><a href="#">Centro de Notificaciones</a></li>
+          </ul>
+        </div>
+
+        <div class="mc-header-bar">
+          <div>
+            <h1 class="mc-header-title">Centro de Notificaciones y Alertas</h1>
+            <p class="mc-header-subtitle">
+              Registro auditable y persistente de novedades procesales, cambios de estado, suspensiones y avisos administrativos.
+            </p>
+          </div>
+          <div class="mc-header-actions">
+            <button type="button" class="button is-dark is-outlined btn-sm" onclick="marcarTodasNotificacionesLeidas()">✓ Marcar todas como leídas</button>
+          </div>
+        </div>
+
+        <div class="meta-summary-bar">
+          <div class="meta-chip">
+            <span class="meta-chip-label">Total Notificaciones:</span>
+            <span class="meta-chip-value">{{ total_rows }}</span>
+          </div>
+          <div class="meta-chip">
+            <span class="meta-chip-label">Pendientes de Lectura:</span>
+            <span class="meta-chip-value" style="color:var(--azzen-orange);">{{ unread_total }}</span>
+          </div>
+        </div>
+
+        <form method="get" action="/notificaciones" class="filters" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; background:#fff; padding:14px 16px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:16px;">
+          <label style="font-weight:600; font-size:13px; color:#475569;">Filtro de Estado:</label>
+          <select name="estado" style="min-width:140px;">
+            <option value="todos" {% if filtro_leido == "todos" %}selected{% endif %}>Todas las notificaciones</option>
+            <option value="no_leidas" {% if filtro_leido == "no_leidas" %}selected{% endif %}>Solo pendientes (no leídas)</option>
+            <option value="leidas" {% if filtro_leido == "leidas" %}selected{% endif %}>Solo leídas</option>
+          </select>
+
+          <label style="font-weight:600; font-size:13px; color:#475569;">Tipo de Evento:</label>
+          <select name="tipo" style="min-width:180px;">
+            <option value="" {% if filtro_tipo.is_empty() %}selected{% endif %}>Todos los tipos</option>
+            <option value="expediente" {% if filtro_tipo == "expediente" %}selected{% endif %}>Expedientes</option>
+            <option value="cambio_estado" {% if filtro_tipo == "cambio_estado" %}selected{% endif %}>Cambios de Estado</option>
+            <option value="suspension" {% if filtro_tipo == "suspension" %}selected{% endif %}>Suspensiones Preventivas</option>
+            <option value="novedad" {% if filtro_tipo == "novedad" %}selected{% endif %}>Novedades Procesales</option>
+            <option value="documento" {% if filtro_tipo == "documento" %}selected{% endif %}>Documentación</option>
+          </select>
+
+          <button type="submit" class="btn-primary">Filtrar</button>
+          <a href="/notificaciones" class="btn-secondary">Limpiar</a>
+        </form>
+
+        <div class="table-wrap">
+          <table class="mc-table">
+            <thead>
+              <tr>
+                <th style="width: 50px; text-align:center;">Estado</th>
+                <th style="width: 140px;">Tipo Evento</th>
+                <th>Título y Detalle</th>
+                <th style="width: 160px;">Fecha y Hora</th>
+                <th style="width: 150px; text-align:center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for n in notificaciones %}
+              <tr style="{% if !n.leido %}background-color: rgba(233, 84, 32, 0.03);{% endif %}">
+                <td style="text-align:center;">
+                  {% if !n.leido %}
+                  <span class="mc-badge estado-rechazada" style="font-size:10px; padding:2px 6px;">Nueva</span>
+                  {% else %}
+                  <span class="muted" style="font-size:11px;">Leída</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="mc-badge estado-entregado" style="font-size:11px;">{{ n.tipo_evento }}</span>
+                </td>
+                <td>
+                  <div style="font-weight:700; color:var(--azzen-dark); font-size:13.5px; margin-bottom:2px;">
+                    {{ n.titulo }}
+                  </div>
+                  <div class="muted" style="font-size:12px; line-height:1.4;">
+                    {{ n.mensaje }}
+                  </div>
+                </td>
+                <td class="muted cell-nowrap" style="font-size:12px;">
+                  {{ n.created_at }}
+                  {% if let Some(la) = n.leido_at %}
+                  <div style="font-size:10.5px; color:#94a3b8;">Leída: {{ la }}</div>
+                  {% endif %}
+                </td>
+                <td style="text-align:center; white-space:nowrap;">
+                  <a href="{{ n.url_destino }}" class="button is-azzen btn-sm" onclick="marcarNotificacionLeida({{ n.id }}, null, '{{ n.url_destino }}')">
+                    Ir al registro ↗
+                  </a>
+                  {% if !n.leido %}
+                  <button type="button" class="button is-dark is-outlined btn-sm" onclick="marcarNotificacionLeida({{ n.id }}, event, null)" style="padding:2px 7px;" title="Marcar como leída">
+                    ✓
+                  </button>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+
+              {% if notificaciones.is_empty() %}
+              <tr>
+                <td colspan="5" style="text-align:center; padding:32px;" class="muted">
+                  No se encontraron notificaciones con los criterios especificados.
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pager" style="margin-top:16px;">
+          {% if page > 1 %}
+          <a href="/notificaciones?tipo={{ filtro_tipo }}&estado={{ filtro_leido }}&page={{ page - 1 }}" class="btn-secondary btn-sm">← Anterior</a>
+          {% endif %}
+          <span class="muted" style="font-size:13px;">Página <strong>{{ page }}</strong> de {{ total_pages }}</span>
+          {% if page < total_pages %}
+          <a href="/notificaciones?tipo={{ filtro_tipo }}&estado={{ filtro_leido }}&page={{ page + 1 }}" class="btn-secondary btn-sm">Siguiente →</a>
+          {% endif %}
+        </div>
+      </main>
+    </div>
+
+    <script src="/static/azzen.js?v=20261025_11"></script>
+  </body>
+</html>
